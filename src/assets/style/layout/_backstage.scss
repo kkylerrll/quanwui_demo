@@ -1,0 +1,4 @@
+.back-container {
+  @apply flex;
+  height: calc(100dvh - var(--header-height));
+}

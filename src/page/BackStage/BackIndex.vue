@@ -1,7 +1,7 @@
 <template>
   <div class="backIndex">
     <Headers />
-    <div class="container">
+    <div class="back-container">
       <AsideMenu></AsideMenu>
       <router-view />
     </div>
@@ -12,6 +12,7 @@
 
 <style lang="scss">
 @import '@/assets/style/all.scss';
+
 .backIndex {
   background-color: $background-color;
 }
