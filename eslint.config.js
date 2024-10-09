@@ -9,6 +9,9 @@ export default [
   ...pluginVue.configs['flat/recommended'],
   eslintPluginPrettierRecommended,
   {
+    env: {
+      node: true, // 指定環境為 Node.js
+    },
     rules: {
       // 自定義規則
       // 'vue/no-unused-vars': 'error',
@@ -16,8 +19,6 @@ export default [
       'vue/multi-word-component-names': 'off',
       'vue/require-default-prop': 'off',
       'prettier/prettier': 'error',
-      // 解決 LF / CRLF 的問題
-      // 最根本解法是：在拉專案前輸入 git config --global core.autocrlf false
     },
   },
   {
@@ -29,6 +30,7 @@ export default [
       },
       globals: {
         cn: false,
+        process: 'readonly',
       },
     },
   },

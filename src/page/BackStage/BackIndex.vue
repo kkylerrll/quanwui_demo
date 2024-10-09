@@ -1,7 +1,10 @@
 <template>
-  <!-- <div style="background: #000; height: 100vh;"></div> -->
   <div class="backIndex">
-    <header class="bg-blue-200 h-[85px]"></header>
+    <Headers />
+    <div class="container">
+      <AsideMenu></AsideMenu>
+      <router-view />
+    </div>
   </div>
 </template>
 
@@ -9,7 +12,7 @@
 
 <style lang="scss">
 @import '@/assets/style/all.scss';
-.box {
-  background-color: $primary-color;
+.backIndex {
+  background-color: $background-color;
 }
 </style>
