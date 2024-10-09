@@ -9,9 +9,6 @@ export default [
   ...pluginVue.configs['flat/recommended'],
   eslintPluginPrettierRecommended,
   {
-    env: {
-      node: true, // 指定環境為 Node.js
-    },
     rules: {
       // 自定義規則
       // 'vue/no-unused-vars': 'error',
@@ -30,7 +27,6 @@ export default [
       },
       globals: {
         cn: false,
-        process: 'readonly',
       },
     },
   },

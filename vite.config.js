@@ -10,7 +10,7 @@ export default defineConfig({
     createSvgIconsPlugin({
       // eslint-disable-next-line no-undef
       iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
-      symbolId: 'icon-[dir]-[name]',
+      symbolId: '[name]',
     }),
   ],
   base: './',
