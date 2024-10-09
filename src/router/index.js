@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import BackIndex from '@/page/BackStage/BackIndex.vue';
 
 const router = createRouter({
@@ -7,9 +7,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'backIndex',
-      compoent: BackIndex,
-    }
-  ]
-})
+      component: BackIndex,
+    },
+  ],
+});
 
 export default router;
