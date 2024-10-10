@@ -1,5 +1,8 @@
 <template>
-  <svg class="svgIcon" aria-hidden="true">
+  <svg
+    class="svgIcon"
+    aria-hidden="true"
+  >
     <use :xlink:href="`#${props.name}`" />
   </svg>
 </template>

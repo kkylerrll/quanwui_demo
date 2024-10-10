@@ -15,5 +15,6 @@
 
 .backIndex {
   background-color: $background-color;
+  overflow: hidden;
 }
 </style>

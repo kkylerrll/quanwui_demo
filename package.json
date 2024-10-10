@@ -10,6 +10,8 @@
     "lint": "eslint . --ext .vue,.ts,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@tanstack/vue-query": "^5.59.6",
+    "@tanstack/vue-table": "^8.20.5",
     "axios": "^1.7.7",
     "core-js": "^3.8.3",
     "postcss-import": "^16.1.0",

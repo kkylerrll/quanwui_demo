@@ -8,6 +8,17 @@ const router = createRouter({
       path: '/',
       name: 'backIndex',
       component: BackIndex,
+      children: [
+        {
+          path: '',
+          name: 'backstageTable',
+          meta: {
+            title: 'backstageTable',
+            requiredKinds: [1],
+          },
+          component: () => import('@/components/backStage/TableData.vue'),
+        },
+      ],
     },
   ],
 });

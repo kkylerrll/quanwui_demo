@@ -1,14 +1,26 @@
 <template>
-  <div ref="headerWrap" class="header_box flex items-center justify-between">
+  <div
+    ref="headerWrap"
+    class="header_box flex items-center justify-between"
+  >
     <div class="logo_box">
-      <img src="@/assets/logo_banner.png" alt="" />
+      <img
+        src="@/assets/logo_banner.png"
+        alt=""
+      />
     </div>
     <div class="actions flex justify-center items-center gap-2.5">
       <div class="notice">
-        <svgIcon name="notice" class="w-[20px] h-[22px]" />
+        <svgIcon
+          name="notice"
+          class="w-[20px] h-[22px]"
+        />
       </div>
       <div class="navbar flex justify-center items-center gap-2.5">
-        <img src="@/assets/images/big.png" alt="" />
+        <img
+          src="@/assets/images/big.png"
+          alt=""
+        />
         <p>林經理</p>
         <svgIcon name="down" />
       </div>
@@ -36,7 +48,7 @@ const handleHeaderHeight = () => {
 };
 
 onMounted(() => {
-  handleHeaderHeight();
+  window.addEventListener('load', handleHeaderHeight);
 });
 </script>
 

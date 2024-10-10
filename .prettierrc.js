@@ -15,4 +15,5 @@ export default {
   vueIndentScriptAndStyle: false,
   // 指定HTML文件的全局空格敏感度 css\strict\ignore
   htmlWhitespaceSensitivity: 'ignore',
+  singleAttributePerLine: true,
 };
