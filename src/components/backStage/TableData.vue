@@ -57,7 +57,7 @@
               <!-- 編輯按鈕 -->
               <button
                 class="editBtn p-2"
-                @click="handleEdit"
+                @click="handleEdit(row.id)"
               >
                 <svgIcon
                   name="edit"
@@ -79,9 +79,14 @@
       v-model:currentPage="currentPage"
       :total="data.length"
       :pageSize="pageSize"
-      @pageChange="onPageChange"
+      @page-change="onPageChange"
     />
   </div>
+  <EditModal
+    v-model="editModalVisible"
+    title="基本設定"
+    :userId="selectedUserId"
+  ></EditModal>
 </template>
 
 <script setup>
@@ -105,6 +110,7 @@ import {
   getExpandedRowModel,
 } from '@tanstack/vue-table';
 import mockData from '@/mock/index';
+import EditModal from './EditModal.vue';
 
 // 假資料中需包含 selected 屬性
 const data = ref(
@@ -125,8 +131,8 @@ const columns = ref([
     accessorKey: 'customer',
     header: '客戶',
     cell: (info) => {
-      const name = info.row.original.customer.name;
-      const phone = info.row.original.customer.phone;
+      const name = info.row.original.name;
+      const phone = info.row.original.phone;
       return h('div', [
         h('div', name), // 名稱
         h('div', phone), // 電話
@@ -200,8 +206,14 @@ function onPageChange(newPage) {
   currentPage.value = newPage; // 更新當前頁碼
 }
 
-const handleEdit = () => {
-  console.log('ok');
+const editModalVisible = ref(false);
+const selectedUserId = ref();
+const handleEdit = (rowId) => {
+  editModalVisible.value = !editModalVisible.value;
+  const selectedUser = data.value[rowId]; // 根據行索引獲取用戶資料
+  if (selectedUser) {
+    selectedUserId.value = selectedUser.id;
+  }
 };
 </script>
 

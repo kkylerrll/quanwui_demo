@@ -34,15 +34,12 @@ const headerWrap = ref(null);
 
 const handleHeaderHeight = () => {
   nextTick(() => {
-    console.log('HeaderWrap:', headerWrap.value);
     if (headerWrap.value) {
       const height = headerWrap.value.clientHeight; // 獲取 DOM 高度
-      console.log('header before set', height);
       document.documentElement.style.setProperty(
         '--header-height',
         `${height}px`,
       ); // 設置 CSS 變量
-      console.log('header', height);
     }
   });
 };

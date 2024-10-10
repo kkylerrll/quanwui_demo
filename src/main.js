@@ -6,6 +6,8 @@ import '@/assets/style/all.scss';
 import '@/assets/style/tailwind.scss';
 import component from './components/index';
 import vuetify from './plugins/vuetify.js';
+import '@mdi/font/css/materialdesignicons.css';
+import './mock/taiwanData';
 
 // createApp(App).mount('#app');
 const app = createApp(App);
