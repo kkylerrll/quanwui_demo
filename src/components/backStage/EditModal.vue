@@ -21,7 +21,11 @@
           <v-tabs-window-item value="one">One</v-tabs-window-item>
 
           <v-tabs-window-item value="two">
-            <v-form>
+            <v-form
+              ref="form"
+              v-slot="{ errors }"
+              @submit.prevent="onSubmit"
+            >
               <v-row dense>
                 <v-col
                   cols="12"
@@ -32,6 +36,7 @@
                   <v-text-field
                     v-model="selectedUser.name"
                     required
+                    :errorMessages="errors.name"
                   ></v-text-field>
                 </v-col>
 
@@ -41,7 +46,11 @@
                   sm="6"
                 >
                   <p>客戶電話</p>
-                  <v-text-field v-model="selectedUser.phone"></v-text-field>
+                  <v-text-field
+                    v-model="selectedUser.phone"
+                    required
+                    :errorMessages="errors.phone"
+                  ></v-text-field>
                 </v-col>
 
                 <v-col
@@ -49,13 +58,12 @@
                   md="4"
                   sm="6"
                 >
-                  <p>作品分類</p>
-                  <v-select
-                    :items="['設計', '18-29', '30-54', '54+']"
-                    label="作品分類"
+                  <p>電子信箱</p>
+                  <v-text-field
+                    v-model="selectedUser.email"
                     required
-                    menuIcon="mdi-chevron-down"
-                  ></v-select>
+                    :errorMessages="errors.email"
+                  ></v-text-field>
                 </v-col>
 
                 <v-col
@@ -86,7 +94,10 @@
                   md="6"
                   sm="6"
                 >
-                  <v-text-field label="地址"></v-text-field>
+                  <v-text-field
+                    v-model="address.street"
+                    label="地址"
+                  ></v-text-field>
                 </v-col>
               </v-row>
             </v-form>
@@ -94,14 +105,20 @@
         </v-tabs-window>
       </v-card-text>
       <v-card-actions>
+        <v-spacer></v-spacer>
         <v-btn
-          v-for="btn in btns"
-          :key="btn.label"
-          :theme="btn.theme"
-          @click="btnAction(btn)"
-        >
-          {{ btn.label }}
-        </v-btn>
+          text="Close"
+          variant="plain"
+          @click="close"
+        ></v-btn>
+
+        <v-btn
+          color="primary"
+          text="Save"
+          variant="tonal"
+          type="button"
+          @click="onSubmit"
+        ></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -110,9 +127,11 @@
 <script setup>
 import { ref, defineProps, defineEmits, onMounted, watch } from 'vue';
 import axios from 'axios';
-
+import { useForm } from 'vee-validate';
+// 引入 Vee Validate 全部驗證規則
+// import AllRules from '@vee-validate/rules';
+import * as yup from 'yup';
 const props = defineProps({
-  isShow: Boolean,
   title: String,
   content: String,
   width: String,
@@ -122,28 +141,20 @@ const props = defineProps({
   userId: Number,
 });
 
-const isShow = ref(props.isShow);
 const tab = ref('one');
 const emit = defineEmits(['update:modelValue']);
-
-function btnAction(btn) {
-  if (btn.action) {
-    btn.action();
-  }
-  if (btn.close) {
-    close();
-  }
-}
-
-function close() {
-  isShow.value = false;
-  emit('update:modelValue', false);
-}
-
 const users = ref([]);
 const taiwanCity = ref([]);
 const taiwanDistricts = ref([]);
-const selectedUser = ref(null);
+const selectedUser = ref({
+  name: '',
+  phone: '',
+  email: '',
+  city: '',
+  district: '',
+});
+const address = ref({ street: '' });
+const workCategories = ref(['設計', '藝術', '科技', '文學']);
 let taiwanAreas = {};
 
 onMounted(async () => {
@@ -164,15 +175,6 @@ onMounted(async () => {
     console.error(error);
   }
 });
-
-// 更新鄉鎮市區選項
-function updateDistricts() {
-  const selectedCity = selectedUser.value.city;
-  taiwanDistricts.value = taiwanAreas[selectedCity] || []; // 根據選擇的縣市更新鄉鎮市區
-  if (taiwanDistricts.value.length > 0) {
-    selectedUser.value.district = taiwanDistricts.value[0]; // 設置為第一個鄉鎮市區
-  }
-}
 
 watch(
   () => props.userId,
@@ -198,6 +200,47 @@ watch(
     }
   },
 );
+
+function close() {
+  emit('update:modelValue', false);
+}
+
+// 更新鄉鎮市區選項
+function updateDistricts() {
+  const selectedCity = selectedUser.value.city;
+  taiwanDistricts.value = taiwanAreas[selectedCity] || []; // 根據選擇的縣市更新鄉鎮市區
+  if (taiwanDistricts.value.length > 0) {
+    selectedUser.value.district = taiwanDistricts.value[0]; // 設置為第一個鄉鎮市區
+  }
+}
+// 定義台灣手機號碼的正則表達式
+const phoneRegEx = /^09\d{8}$/;
+// 定義表單規則
+const schema = yup.object({
+  name: yup.string().required('名稱是必填的'),
+  phone: yup
+    .string()
+    .required('電話是必填的')
+    .matches(phoneRegEx, '請輸入有效的電話號碼'),
+  email: yup
+    .string()
+    .email('請輸入有效的電子郵件')
+    .required('電子郵件是必填的'),
+});
+// 表單驗證
+const { handleSubmit, errors } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    name: '',
+    phone: '',
+    mail: '',
+  },
+});
+
+const onSubmit = handleSubmit(() => {
+  console.log('提交', selectedUser.value, address, workCategories);
+  emit('update:modelValue', false);
+});
 </script>
 
 <style lang="scss" scoped>
