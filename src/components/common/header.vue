@@ -48,7 +48,11 @@ const handleHeaderHeight = () => {
 };
 
 onMounted(() => {
-  window.addEventListener('load', handleHeaderHeight);
+  // handleHeaderHeight();
+  // window.addEventListener('load', handleHeaderHeight);
+  setTimeout(() => {
+    handleHeaderHeight();
+  }, 0);
 });
 </script>
 

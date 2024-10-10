@@ -2,7 +2,7 @@ import Mock from 'mockjs';
 
 // 定義隨機生成的資料格式
 const mockTableData = Mock.mock({
-  'data|20-30': [
+  'data|200-500': [
     {
       id: '@id()', // 隨機 ID
       checkbox: '@boolean()',

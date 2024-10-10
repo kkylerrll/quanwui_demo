@@ -1,5 +1,5 @@
 <template>
-  <div class="tableBox flex flex-1">
+  <div class="tableBox flex flex-1 flex-col">
     <Table>
       <TableHeader>
         <TableRow
@@ -44,18 +44,20 @@
             :key="cell.id"
           >
             <template v-if="cell.column.columnDef.accessorKey === 'actions'">
+              <!-- 分享按鈕 -->
               <button
                 class="shareBtn p-2"
-                @click="handleAction(row.id, 'edit')"
+                @click="handleShare"
               >
                 <svgIcon
                   name="share"
                   class="w-[22px] h-[22px]"
                 />
               </button>
+              <!-- 編輯按鈕 -->
               <button
                 class="editBtn p-2"
-                @click="handleAction(row.id, 'delete')"
+                @click="handleEdit"
               >
                 <svgIcon
                   name="edit"
@@ -73,11 +75,17 @@
         </TableRow>
       </TableBody>
     </Table>
+    <Pagination
+      v-model:currentPage="currentPage"
+      :total="data.length"
+      :pageSize="pageSize"
+      @pageChange="onPageChange"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, h } from 'vue';
+import { ref, watch, h, computed } from 'vue';
 import {
   Table,
   TableBody,
@@ -86,6 +94,7 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
+import Pagination from '../ui/Pagination/Pagination.vue';
 import {
   useVueTable,
   FlexRender,
@@ -151,8 +160,15 @@ const columns = ref([
   },
 ]);
 
+const pageSize = ref(10); // 每頁顯示的資料數量
+const currentPage = ref(1); // 當前頁碼
+
 const table = useVueTable({
-  data: data.value,
+  data: computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return data.value.slice(start, end); // 取得當前頁面的資料
+  }),
   columns: columns.value,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
@@ -178,6 +194,15 @@ function toggleAll() {
   });
   allSelected.value = newValue;
 }
+
+// 分頁變更事件處理
+function onPageChange(newPage) {
+  currentPage.value = newPage; // 更新當前頁碼
+}
+
+const handleEdit = () => {
+  console.log('ok');
+};
 </script>
 
 <style lang="scss" scoped>
@@ -195,6 +220,7 @@ function toggleAll() {
 .editBtn {
   border: 1px solid $primary-color;
   border-radius: 5px;
+  margin-left: 10px;
 }
 .headerRow {
   background-color: #f6f6f6;
