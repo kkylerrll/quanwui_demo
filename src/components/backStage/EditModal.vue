@@ -19,101 +19,7 @@
       <v-card-text>
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="one">
-            <v-form
-              id="oneForm"
-              @submit.prevent="onSubmit"
-            >
-              <v-row dense>
-                <v-col
-                  cols="12"
-                  md="4"
-                  sm="6"
-                >
-                  <p>客戶名稱</p>
-                  <v-text-field
-                    v-model="formValues.name"
-                    required
-                    :error-messages="errors.name"
-                  ></v-text-field>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                  sm="6"
-                >
-                  <p>客戶電話</p>
-                  <v-text-field
-                    v-model="formValues.phone"
-                    required
-                    :error-messages="errors.phone"
-                  ></v-text-field>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                  sm="6"
-                >
-                  <p>電子信箱</p>
-                  <v-text-field
-                    v-model="formValues.email"
-                    required
-                    :error-messages="errors.email"
-                  ></v-text-field>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="3"
-                  sm="6"
-                >
-                  <v-select
-                    v-model="formValues.city"
-                    :items="taiwanCity"
-                    :error-messages="errors.city"
-                    @change="updateDistricts"
-                  ></v-select>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="3"
-                  sm="6"
-                >
-                  <v-select
-                    v-model="formValues.district"
-                    :items="taiwanDistricts"
-                    :error-messages="errors.district"
-                  ></v-select>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="6"
-                  sm="6"
-                >
-                  <v-text-field
-                    v-model="formValues.street"
-                    label="地址"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-spacer></v-spacer>
-              <v-btn
-                text="Close"
-                variant="plain"
-                @click="close"
-              ></v-btn>
-
-              <v-btn
-                form="oneForm"
-                color="primary"
-                text="Save"
-                variant="tonal"
-                type="submit"
-              ></v-btn>
-            </v-form>
+            <FirstForm @close="close" />
           </v-tabs-window-item>
           <v-tabs-window-item value="two">
             <v-form
@@ -130,7 +36,7 @@
                   <v-text-field
                     v-model="formValues.name"
                     required
-                    :error-messages="errors.name"
+                    :errorMessages="errors.name"
                   ></v-text-field>
                 </v-col>
 
@@ -143,7 +49,7 @@
                   <v-text-field
                     v-model="formValues.phone"
                     required
-                    :error-messages="errors.phone"
+                    :errorMessages="errors.phone"
                   ></v-text-field>
                 </v-col>
 
@@ -156,7 +62,7 @@
                   <v-text-field
                     v-model="formValues.email"
                     required
-                    :error-messages="errors.email"
+                    :errorMessages="errors.email"
                   ></v-text-field>
                 </v-col>
 
@@ -168,7 +74,7 @@
                   <v-select
                     v-model="formValues.city"
                     :items="taiwanCity"
-                    :error-messages="errors.city"
+                    :errorMessages="errors.city"
                     @change="updateDistricts"
                   ></v-select>
                 </v-col>
@@ -181,7 +87,7 @@
                   <v-select
                     v-model="formValues.district"
                     :items="taiwanDistricts"
-                    :error-messages="errors.district"
+                    :errorMessages="errors.district"
                   ></v-select>
                 </v-col>
 
@@ -222,8 +128,9 @@
 <script setup>
 import { ref, defineProps, defineEmits, onMounted, watch } from 'vue';
 import axios from 'axios';
-import { useForm } from 'vee-validate';
+import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
+import FirstForm from './FirstForm.vue';
 
 const props = defineProps({
   title: String,
@@ -243,7 +150,7 @@ let taiwanAreas = {};
 const formValues = ref({});
 
 // 定義 Yup 驗證規則
-const schema = yup.object({
+const schema = yup.object().shape({
   name: yup.string().required('名稱是必填的'),
   phone: yup
     .string()
@@ -261,7 +168,7 @@ const schema = yup.object({
 // 使用 vee-validate 進行表單管理
 const { handleSubmit, errors, resetForm } = useForm({
   validationSchema: schema,
-  initialValues: formValues.value,
+  // initialValues: formValues.value,
 });
 
 onMounted(async () => {
