@@ -18,12 +18,9 @@
       </v-tabs>
       <v-card-text>
         <v-tabs-window v-model="tab">
-          <v-tabs-window-item value="one">One</v-tabs-window-item>
-
-          <v-tabs-window-item value="two">
+          <v-tabs-window-item value="one">
             <v-form
-              ref="form"
-              v-slot="{ errors }"
+              id="oneForm"
               @submit.prevent="onSubmit"
             >
               <v-row dense>
@@ -34,9 +31,9 @@
                 >
                   <p>客戶名稱</p>
                   <v-text-field
-                    v-model="selectedUser.name"
+                    v-model="formValues.name"
                     required
-                    :errorMessages="errors.name"
+                    :error-messages="errors.name"
                   ></v-text-field>
                 </v-col>
 
@@ -47,9 +44,9 @@
                 >
                   <p>客戶電話</p>
                   <v-text-field
-                    v-model="selectedUser.phone"
+                    v-model="formValues.phone"
                     required
-                    :errorMessages="errors.phone"
+                    :error-messages="errors.phone"
                   ></v-text-field>
                 </v-col>
 
@@ -60,9 +57,9 @@
                 >
                   <p>電子信箱</p>
                   <v-text-field
-                    v-model="selectedUser.email"
+                    v-model="formValues.email"
                     required
-                    :errorMessages="errors.email"
+                    :error-messages="errors.email"
                   ></v-text-field>
                 </v-col>
 
@@ -72,8 +69,9 @@
                   sm="6"
                 >
                   <v-select
-                    v-model="selectedUser.city"
+                    v-model="formValues.city"
                     :items="taiwanCity"
+                    :error-messages="errors.city"
                     @change="updateDistricts"
                   ></v-select>
                 </v-col>
@@ -84,8 +82,9 @@
                   sm="6"
                 >
                   <v-select
-                    v-model="selectedUser.district"
+                    v-model="formValues.district"
                     :items="taiwanDistricts"
+                    :error-messages="errors.district"
                   ></v-select>
                 </v-col>
 
@@ -95,31 +94,127 @@
                   sm="6"
                 >
                   <v-text-field
-                    v-model="address.street"
+                    v-model="formValues.street"
                     label="地址"
                   ></v-text-field>
                 </v-col>
               </v-row>
+              <v-spacer></v-spacer>
+              <v-btn
+                text="Close"
+                variant="plain"
+                @click="close"
+              ></v-btn>
+
+              <v-btn
+                form="oneForm"
+                color="primary"
+                text="Save"
+                variant="tonal"
+                type="submit"
+              ></v-btn>
+            </v-form>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="two">
+            <v-form
+              id="check-form"
+              @submit.prevent="onSubmit"
+            >
+              <v-row dense>
+                <v-col
+                  cols="12"
+                  md="4"
+                  sm="6"
+                >
+                  <p>客戶名稱</p>
+                  <v-text-field
+                    v-model="formValues.name"
+                    required
+                    :error-messages="errors.name"
+                  ></v-text-field>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="4"
+                  sm="6"
+                >
+                  <p>客戶電話</p>
+                  <v-text-field
+                    v-model="formValues.phone"
+                    required
+                    :error-messages="errors.phone"
+                  ></v-text-field>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="4"
+                  sm="6"
+                >
+                  <p>電子信箱</p>
+                  <v-text-field
+                    v-model="formValues.email"
+                    required
+                    :error-messages="errors.email"
+                  ></v-text-field>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="3"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="formValues.city"
+                    :items="taiwanCity"
+                    :error-messages="errors.city"
+                    @change="updateDistricts"
+                  ></v-select>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="3"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="formValues.district"
+                    :items="taiwanDistricts"
+                    :error-messages="errors.district"
+                  ></v-select>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="6"
+                  sm="6"
+                >
+                  <v-text-field
+                    v-model="formValues.street"
+                    label="地址"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-spacer></v-spacer>
+              <v-btn
+                text="Close"
+                variant="plain"
+                @click="close"
+              ></v-btn>
+
+              <v-btn
+                form="check-form"
+                color="primary"
+                text="Save"
+                variant="tonal"
+                type="submit"
+              ></v-btn>
             </v-form>
           </v-tabs-window-item>
         </v-tabs-window>
       </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          text="Close"
-          variant="plain"
-          @click="close"
-        ></v-btn>
-
-        <v-btn
-          color="primary"
-          text="Save"
-          variant="tonal"
-          type="button"
-          @click="onSubmit"
-        ></v-btn>
-      </v-card-actions>
+      <v-card-actions></v-card-actions>
     </v-card>
   </v-dialog>
 </template>
@@ -128,45 +223,50 @@
 import { ref, defineProps, defineEmits, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useForm } from 'vee-validate';
-// 引入 Vee Validate 全部驗證規則
-// import AllRules from '@vee-validate/rules';
 import * as yup from 'yup';
+
 const props = defineProps({
   title: String,
-  content: String,
   width: String,
-  btns: Array,
-  dialogId: String,
   modelValue: Boolean,
   userId: Number,
 });
 
-const tab = ref('one');
 const emit = defineEmits(['update:modelValue']);
-const users = ref([]);
+const tab = ref('one');
 const taiwanCity = ref([]);
 const taiwanDistricts = ref([]);
-const selectedUser = ref({
-  name: '',
-  phone: '',
-  email: '',
-  city: '',
-  district: '',
-});
-const address = ref({ street: '' });
-const workCategories = ref(['設計', '藝術', '科技', '文學']);
+const users = ref([]);
+const selectedUser = ref({});
 let taiwanAreas = {};
+
+const formValues = ref({});
+
+// 定義 Yup 驗證規則
+const schema = yup.object({
+  name: yup.string().required('名稱是必填的'),
+  phone: yup
+    .string()
+    .required('電話是必填的')
+    .matches(/^09\d{8}$/, '請輸入有效的電話號碼'),
+  email: yup
+    .string()
+    .email('請輸入有效的電子郵件')
+    .required('電子郵件是必填的'),
+  city: yup.string().nullable(),
+  district: yup.string().nullable(),
+  street: yup.string().nullable(),
+});
+
+// 使用 vee-validate 進行表單管理
+const { handleSubmit, errors, resetForm } = useForm({
+  validationSchema: schema,
+  initialValues: formValues.value,
+});
 
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/taiwan-users', {
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-    });
-    users.value = response.data.data; // 獲取模擬的資料
+    const response = await axios.get('/api/taiwan-users');
     const { taiwanUsers, taiwanAreas: areas } = response.data.data;
     users.value = taiwanUsers;
     taiwanAreas = areas;
@@ -176,75 +276,54 @@ onMounted(async () => {
   }
 });
 
+// 監聽 userId 變化
 watch(
   () => props.userId,
   (newValue) => {
     if (newValue) {
       selectedUser.value =
         users.value.find((user) => user.id === newValue) || null;
+      formValues.value = { ...selectedUser.value };
       updateDistricts();
     } else {
-      selectedUser.value = null; // 若沒有 userId，則清空選擇的用戶
+      selectedUser.value = null;
+      resetForm();
     }
   },
 );
 
-// 監聽 selectedUser.city 的變化
 watch(
-  () => selectedUser.value?.city,
-  (newCity) => {
-    if (newCity) {
-      updateDistricts(); // 當選擇的城市改變時，更新鄉鎮市區
+  () => selectedUser.value,
+  (newUser) => {
+    if (newUser) {
+      formValues.value = { ...newUser };
     } else {
-      taiwanDistricts.value = []; // 若沒有選擇城市，清空鄉鎮市區
+      resetForm(); // 清空表單
     }
   },
 );
+
+function updateDistricts() {
+  const selectedCity = formValues.value.city;
+  taiwanDistricts.value = taiwanAreas[selectedCity] || [];
+}
 
 function close() {
   emit('update:modelValue', false);
 }
 
-// 更新鄉鎮市區選項
-function updateDistricts() {
-  const selectedCity = selectedUser.value.city;
-  taiwanDistricts.value = taiwanAreas[selectedCity] || []; // 根據選擇的縣市更新鄉鎮市區
-  if (taiwanDistricts.value.length > 0) {
-    selectedUser.value.district = taiwanDistricts.value[0]; // 設置為第一個鄉鎮市區
-  }
+// 處理提交表單
+function onSubmit() {
+  console.error(errors.value);
+  console.log(formValues.value);
+  handleSubmit((values) => {
+    console.log('提交的表單資料:', values);
+    emit('update:modelValue', false);
+  })();
 }
-// 定義台灣手機號碼的正則表達式
-const phoneRegEx = /^09\d{8}$/;
-// 定義表單規則
-const schema = yup.object({
-  name: yup.string().required('名稱是必填的'),
-  phone: yup
-    .string()
-    .required('電話是必填的')
-    .matches(phoneRegEx, '請輸入有效的電話號碼'),
-  email: yup
-    .string()
-    .email('請輸入有效的電子郵件')
-    .required('電子郵件是必填的'),
-});
-// 表單驗證
-const { handleSubmit, errors } = useForm({
-  validationSchema: schema,
-  initialValues: {
-    name: '',
-    phone: '',
-    mail: '',
-  },
-});
-
-const onSubmit = handleSubmit(() => {
-  console.log('提交', selectedUser.value, address, workCategories);
-  emit('update:modelValue', false);
-});
 </script>
 
 <style lang="scss" scoped>
-// @import '@/assets/style/all.scss';
 .v-dialog {
   .v-overlay__content {
     .v-card {
