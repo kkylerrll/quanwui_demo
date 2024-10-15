@@ -1,5 +1,5 @@
 import Headers from './common/header.vue';
-import AsideMenu from './backStage/AsideMenu.vue';
+import AsideMenu from './common/AsideMenu.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 
 // 初始化

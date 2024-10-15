@@ -11,13 +11,33 @@ const router = createRouter({
       children: [
         {
           path: '',
+          name: 'backDashbord',
+          meta: {
+            title: 'home',
+            requiredKinds: [1],
+          },
+          component: () => import('@/components/backStage/Dashbord.vue'),
+        },
+        {
+          path: 'workslist',
           name: 'backstageTable',
           meta: {
-            title: 'backstageTable',
+            title: 'workslist',
             requiredKinds: [1],
+            category: 'workGroup',
           },
           component: () => import('@/components/backStage/TableData.vue'),
         },
+        // {
+        //   path: 'workstemplate',
+        //   name: 'backstageTemplate',
+        //   meta: {
+        //     title: 'backstageTemplate',
+        //     requiredKinds: [1],
+        //     category: 'workGroup',
+        //   },
+        //   component: () => import('@/components/backStage/workTemplate.vue'),
+        // },
       ],
     },
   ],
