@@ -2,10 +2,7 @@
   <div class="tableBox flex flex-1 flex-col">
     <Table>
       <TableHeader>
-        <TableRow
-          class="headerRow"
-          :rowIndex="1"
-        >
+        <TableRow class="headerRow" :rowIndex="1">
           <TableHead>
             <input
               id="select-all"
@@ -15,10 +12,7 @@
               @change="toggleAll"
             />
           </TableHead>
-          <TableHead
-            v-for="column in columns"
-            :key="column.accessorKey"
-          >
+          <TableHead v-for="column in columns" :key="column.accessorKey">
             {{ column.header }}
           </TableHead>
         </TableRow>
@@ -39,30 +33,15 @@
               @change="(e) => updateSelection(row.id, e.target.checked)"
             />
           </TableCell>
-          <TableCell
-            v-for="cell in row.getVisibleCells()"
-            :key="cell.id"
-          >
+          <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
             <template v-if="cell.column.columnDef.accessorKey === 'actions'">
               <!-- 分享按鈕 -->
-              <button
-                class="shareBtn p-2"
-                @click="handleShare"
-              >
-                <svgIcon
-                  name="share"
-                  class="w-[22px] h-[22px]"
-                />
+              <button class="shareBtn p-2" @click="handleShare">
+                <svgIcon name="share" class="w-[22px] h-[22px]" />
               </button>
               <!-- 編輯按鈕 -->
-              <button
-                class="editBtn p-2"
-                @click="handleEdit(row.id)"
-              >
-                <svgIcon
-                  name="edit"
-                  class="w-[22px] h-[22px]"
-                />
+              <button class="editBtn p-2" @click="handleEdit(row.id)">
+                <svgIcon name="edit" class="w-[22px] h-[22px]" />
               </button>
             </template>
             <template v-else>
