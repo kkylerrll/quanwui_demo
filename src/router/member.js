@@ -37,7 +37,7 @@ export default [
           requiredKinds: [3],
           category: 'workGroup',
         },
-        component: () => import('@/components/backStage/WorkTemplate.vue'),
+        component: () => import('@/components/backStage/VuetifyTable.vue'),
       },
     ],
   },

@@ -3,10 +3,12 @@ import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import path from 'path';
+// import { vitePluginFakeServer } from 'vite-plugin-fake-server';
 
 export default defineConfig({
   plugins: [
     vue(),
+    // vitePluginFakeServer(),
     createSvgIconsPlugin({
       // eslint-disable-next-line no-undef
       iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],

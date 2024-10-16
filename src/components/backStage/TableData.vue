@@ -19,7 +19,7 @@
       </TableHeader>
       <TableBody>
         <TableRow
-          v-for="(row, index) in table.getRowModel().rows"
+          v-for="(row, index) in tableRows"
           :key="row.id"
           :rowIndex="index"
         >
@@ -162,7 +162,9 @@ const table = useVueTable({
   getRowCanExpand: () => true,
   getExpandedRowModel: getExpandedRowModel(),
 });
-
+const tableRows = computed(() => {
+  return table.getRowModel().rows;
+});
 // 追蹤是否全選的狀態
 const allSelected = ref(false);
 

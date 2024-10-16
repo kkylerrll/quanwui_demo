@@ -11,12 +11,6 @@ const mockTableData = userData.map((user) => ({
   status: Mock.Random.boolean(), // 隨機狀態 (true/false)
   createTime: Mock.Random.date('yyyy-MM-dd HH:mm:ss'), // 隨機創建時間，格式化為 yyyy-MM-dd HH:mm:ss
   onlineView: Mock.Random.boolean(), // 隨機線上帶看狀態 (true/false)
-  actions: [
-    {
-      name: Mock.Random.pick(['重新命名', '刪除', '寄送', '編輯', '3D升級']),
-      action: Mock.Random.word(),
-    },
-  ],
 }));
 
 export default mockTableData;
