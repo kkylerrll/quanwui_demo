@@ -107,7 +107,7 @@ const toggleSubList = (groupIndex) => {
 
 // 單一路由的點擊事件
 const toggleSingleRoute = (groupIndex) => {
-  groupedRoutes.value.forEach((group, i) => {
+  groupedRoutes.value.forEach((group) => {
     group.routes.forEach((route) => {
       route.checked = false;
     });

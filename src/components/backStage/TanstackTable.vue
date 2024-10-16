@@ -2,7 +2,10 @@
   <div class="tableBox flex flex-1 flex-col">
     <Table>
       <TableHeader>
-        <TableRow class="headerRow" :rowIndex="1">
+        <TableRow
+          class="headerRow"
+          :rowIndex="1"
+        >
           <TableHead>
             <input
               id="select-all"
@@ -12,7 +15,10 @@
               @change="toggleAll"
             />
           </TableHead>
-          <TableHead v-for="column in columns" :key="column.accessorKey">
+          <TableHead
+            v-for="column in columns"
+            :key="column.accessorKey"
+          >
             {{ column.header }}
           </TableHead>
         </TableRow>
@@ -33,15 +39,30 @@
               @change="(e) => updateSelection(row.id, e.target.checked)"
             />
           </TableCell>
-          <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+          <TableCell
+            v-for="cell in row.getVisibleCells()"
+            :key="cell.id"
+          >
             <template v-if="cell.column.columnDef.accessorKey === 'actions'">
               <!-- 分享按鈕 -->
-              <button class="shareBtn p-2" @click="handleShare">
-                <svgIcon name="share" class="w-[22px] h-[22px]" />
+              <button
+                class="shareBtn p-2"
+                @click="handleShare"
+              >
+                <svgIcon
+                  name="share"
+                  class="w-[22px] h-[22px]"
+                />
               </button>
               <!-- 編輯按鈕 -->
-              <button class="editBtn p-2" @click="handleEdit(row.id)">
-                <svgIcon name="edit" class="w-[22px] h-[22px]" />
+              <button
+                class="editBtn p-2"
+                @click="handleEdit(row.id)"
+              >
+                <svgIcon
+                  name="edit"
+                  class="w-[22px] h-[22px]"
+                />
               </button>
             </template>
             <template v-else>
@@ -69,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, watch, h, computed } from 'vue';
+import { ref, watch, h, computed, onMounted } from 'vue';
 import {
   Table,
   TableBody,
@@ -88,16 +109,12 @@ import {
   getFilteredRowModel,
   getExpandedRowModel,
 } from '@tanstack/vue-table';
-import mockData from '@/mock/index';
+// import mockData from '@/mock/index';
 import EditModal from './EditModal.vue';
+import axios from 'axios';
 
 // 假資料中需包含 selected 屬性
-const data = ref(
-  mockData.map((item) => ({
-    ...item,
-    selected: false, // 新增 selected 屬性
-  })),
-);
+const data = ref([]);
 
 // 定義表格的欄位
 const columns = ref([
@@ -145,15 +162,25 @@ const columns = ref([
   },
 ]);
 
+const tableData = async (page = 1) => {
+  try {
+    const response = await axios.get(`/api/table-data?page=${page}`);
+    data.value = response.data.data;
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const pageSize = ref(10); // 每頁顯示的資料數量
 const currentPage = ref(1); // 當前頁碼
 
+onMounted(() => {
+  tableData(currentPage.value);
+});
+
 const table = useVueTable({
-  data: computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value;
-    const end = start + pageSize.value;
-    return data.value.slice(start, end); // 取得當前頁面的資料
-  }),
+  data: computed(() => data.value),
   columns: columns.value,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
@@ -185,6 +212,7 @@ function toggleAll() {
 // 分頁變更事件處理
 function onPageChange(newPage) {
   currentPage.value = newPage; // 更新當前頁碼
+  tableData(newPage);
 }
 
 const editModalVisible = ref(false);

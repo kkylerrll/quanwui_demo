@@ -18,6 +18,12 @@ export default defineConfig({
   base: './',
   server: {
     port: 5174, // 你可以設置你想要的端口
+    // 允許從任何主機進行訪問
+    host: true,
+    // 啟用壓縮
+    compress: true,
+    // 關閉主機檢查
+    disableHostCheck: true,
   },
   resolve: {
     extensions: ['.js', '.ts', '.json'], // 導入時想要省略的擴展名列表

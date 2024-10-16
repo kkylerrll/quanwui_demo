@@ -1,16 +1,53 @@
-// mockTableData.js
 import Mock from 'mockjs';
 import userData from './userData'; // 引入用戶資料
 
 // 定義 mockTableData
-const mockTableData = userData.map((user) => ({
+const mockTableData = userData.map((user, index) => ({
   ...user,
-  checkbox: Mock.Random.boolean(), // 隨機生成 checkbox 狀態
-  workName: Mock.Random.ctitle(5, 10), // 隨機作品名稱 (5 到 10 個中文字符)
-  readCount: Mock.Random.integer(0, 200000), // 隨機閱讀次數
-  status: Mock.Random.boolean(), // 隨機狀態 (true/false)
-  createTime: Mock.Random.date('yyyy-MM-dd HH:mm:ss'), // 隨機創建時間，格式化為 yyyy-MM-dd HH:mm:ss
-  onlineView: Mock.Random.boolean(), // 隨機線上帶看狀態 (true/false)
+  wid: index + 1, // 按順序從 1 開始生成 wid
+  checkbox: Mock.Random.boolean(),
+  workName: Mock.Random.ctitle(5, 10),
+  readCount: Mock.Random.integer(0, 200000),
+  status: Mock.Random.boolean(),
+  createTime: Mock.Random.date('yyyy-MM-dd HH:mm:ss'),
+  onlineView: Mock.Random.boolean(),
 }));
+
+// 定義每頁顯示的筆數
+const pageSize = 10;
+
+// 設定模擬 API 的延遲時間 (單位是毫秒)，這裡設置為 500ms 延遲
+Mock.setup({
+  timeout: '500-1000', // 模擬 API 回應的延遲時間範圍為 500-1000ms
+});
+
+// 分頁 API 模擬函數
+Mock.mock(/\/api\/table-data\?page=\d+/, 'get', (options) => {
+  const urlParams = new URLSearchParams(options.url.split('?')[1]);
+  const page = parseInt(urlParams.get('page'), 10) || 1;
+
+  const total = mockTableData.length; // 總共幾筆資料
+  const totalPages = Math.ceil(total / pageSize); // 總頁數
+
+  // 計算當前頁的數據範圍
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  // 當前頁數據
+  const pageData = mockTableData.slice(startIndex, endIndex);
+
+  // 返回模擬的 API 數據
+  return {
+    code: 1,
+    msg: 'success',
+    data: {
+      data: pageData, // 當前頁的數據
+      total, // 總共幾筆資料
+      per_page: pageSize, // 每頁幾筆
+      current_page: page, // 當前頁碼
+      last_page: totalPages, // 總頁數
+    },
+  };
+});
 
 export default mockTableData;

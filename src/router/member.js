@@ -27,7 +27,7 @@ export default [
           requiredKinds: [3],
           category: 'workGroup',
         },
-        component: () => import('@/components/backStage/TableData.vue'),
+        component: () => import('@/components/backStage/TanstackTable.vue'),
       },
       {
         path: 'worksTemplate',

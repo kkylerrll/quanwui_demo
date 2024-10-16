@@ -26,7 +26,7 @@ const router = createRouter({
             requiredKinds: [3],
             category: 'tableGroup',
           },
-          component: () => import('@/components/backStage/TableData.vue'),
+          component: () => import('@/components/backStage/TanstackTable.vue'),
         },
         {
           path: 'vuetifyTable',
