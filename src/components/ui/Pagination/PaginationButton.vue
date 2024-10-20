@@ -27,7 +27,7 @@ const handleClick = (event) => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .pagination-button {
   padding: 8px;
   border: 1px solid #a7a7a7;

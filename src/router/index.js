@@ -19,7 +19,7 @@ const router = createRouter({
           component: () => import('@/components/backStage/Dashboard.vue'),
         },
         {
-          path: 'tanStackTable',
+          path: 'tanStackTable/:page?',
           name: 'memberWorksList',
           meta: {
             title: 'tanStackTable',

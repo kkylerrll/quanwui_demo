@@ -1,36 +1,45 @@
 <template>
   <div class="tableBox flex flex-1 flex-col">
-    <Table>
-      <TableHeader>
-        <TableRow
-          v-for="headerGroup in table.getHeaderGroups()"
-          :key="headerGroup.id"
-          class="headerRow"
-          :rowIndex="1"
-        >
-          <TableHead>
-            <input
-              id="select-all"
-              type="checkbox"
-              :checked="allSelected"
-              aria-label="Select all rows"
-              @change="toggleAll"
-            />
-          </TableHead>
-          <!-- 手動定義排序 -->
-          <TableHead
-            v-for="header in headerGroup.headers"
-            :key="header.id"
-            scope="col"
+    <div class="flex justify-end">
+      <input
+        v-model="filter"
+        type="text"
+        placeholder="請輸入作品名稱"
+        class="searchInput"
+      />
+    </div>
+    <div class="table-container">
+      <Table>
+        <TableHeader>
+          <TableRow
+            v-for="headerGroup in table.getHeaderGroups()"
+            :key="headerGroup.id"
+            class="headerRow"
+            :rowIndex="1"
           >
-            <FlexRender
-              :render="header.column.columnDef.header"
-              :props="header.getContext()"
-            />
-            <sortBtn :header="header"></sortBtn>
-          </TableHead>
-          <!-- 自動排序 -->
-          <!-- <TableHead
+            <TableHead>
+              <input
+                id="select-all"
+                type="checkbox"
+                :checked="allSelected"
+                aria-label="Select all rows"
+                @change="toggleAll"
+              />
+            </TableHead>
+            <!-- 手動定義排序 -->
+            <TableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              scope="col"
+            >
+              <FlexRender
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
+              <sortBtn :header="header"></sortBtn>
+            </TableHead>
+            <!-- 自動排序 -->
+            <!-- <TableHead
             v-for="header in headerGroup.headers"
             :key="header.id"
             scope="col"
@@ -42,66 +51,67 @@
             />
             <sortBtn :header="header"></sortBtn>
           </TableHead> -->
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow
-          v-for="(row, index) in tableRows"
-          :key="row.id"
-          :rowIndex="index"
-        >
-          <TableCell>
-            <input
-              :id="'checkbox-' + row.id"
-              name="rowCheckbox"
-              type="checkbox"
-              :checked="row.original.selected"
-              aria-label="Select row"
-              @change="(e) => updateSelection(row.id, e.target.checked)"
-            />
-          </TableCell>
-          <TableCell
-            v-for="cell in row.getVisibleCells()"
-            :key="cell.id"
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow
+            v-for="(row, index) in tableRows"
+            :key="row.id"
+            :rowIndex="index"
           >
-            <template v-if="cell.column.columnDef.accessorKey === 'actions'">
-              <!-- 分享按鈕 -->
-              <button
-                class="shareBtn p-2"
-                @click="handleShare"
-              >
-                <svgIcon
-                  name="share"
-                  class="w-[22px] h-[22px]"
-                />
-              </button>
-              <!-- 編輯按鈕 -->
-              <button
-                class="editBtn p-2"
-                @click="handleEdit(row.id)"
-              >
-                <svgIcon
-                  name="edit"
-                  class="w-[22px] h-[22px]"
-                />
-              </button>
-            </template>
-            <template v-else>
-              <FlexRender
-                :render="cell.column.columnDef.cell"
-                :props="cell.getContext()"
+            <TableCell>
+              <input
+                :id="'checkbox-' + row.id"
+                name="rowCheckbox"
+                type="checkbox"
+                :checked="row.original.selected"
+                aria-label="Select row"
+                @change="(e) => updateSelection(row.id, e.target.checked)"
               />
-            </template>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-    <Pagination
-      v-model:currentPage="currentPage"
-      :total="totalRecords"
-      :pageSize="pageSize"
-      @page-change="onPageChange"
-    />
+            </TableCell>
+            <TableCell
+              v-for="cell in row.getVisibleCells()"
+              :key="cell.id"
+            >
+              <template v-if="cell.column.columnDef.accessorKey === 'actions'">
+                <!-- 分享按鈕 -->
+                <button
+                  class="shareBtn p-2"
+                  @click="handleShare"
+                >
+                  <svgIcon
+                    name="share"
+                    class="w-[22px] h-[22px]"
+                  />
+                </button>
+                <!-- 編輯按鈕 -->
+                <button
+                  class="editBtn p-2"
+                  @click="handleEdit(row.id)"
+                >
+                  <svgIcon
+                    name="edit"
+                    class="w-[22px] h-[22px]"
+                  />
+                </button>
+              </template>
+              <template v-else>
+                <FlexRender
+                  :render="cell.column.columnDef.cell"
+                  :props="cell.getContext()"
+                />
+              </template>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      <Pagination
+        v-model:currentPage="currentPage"
+        :total="totalRecords"
+        :pageSize="pageSize"
+        @page-change="onPageChange"
+      />
+    </div>
   </div>
   <EditModal
     v-model="editModalVisible"
@@ -132,6 +142,7 @@ import {
 import EditModal from './EditModal.vue';
 import { getPaginatedData } from '@/mock/index'; // 引入你的假資料獲取函數
 import sortBtn from '../ui/table/sortBtn.vue';
+import { useRoute, useRouter } from 'vue-router';
 
 // 儲存表格資料
 const data = ref([]);
@@ -141,9 +152,8 @@ const columns = ref([
   {
     accessorKey: 'workName',
     header: '作品名稱',
-    cell: (info) => info.getValue(),
-    // getCanSort: () => false, // 此列不可排序
-    enableSorting: false,
+    enableSorting: false, // 不可排序
+    // enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'customer',
@@ -156,48 +166,45 @@ const columns = ref([
         h('div', phone), // 電話
       ]);
     },
-    // getCanSort: () => false, // 此列不可排序
     enableSorting: false,
+    // enableGlobalFilter: true, // 不可搜尋
   },
   {
     accessorKey: 'readCount',
     header: '閱讀次數',
-    cell: (info) => info.getValue(),
-    getCanSort: () => true, // 這列可排序
-    // getIsSorted: (info) => info.column.getIsSorted(), // 根據排序狀態返回
+    // enableGlobalFilter: false, // 不可搜尋
   },
   {
     accessorKey: 'status',
     header: '狀態',
     cell: (info) => (info.getValue() ? '公開' : '不公開'),
-    // getCanSort: () => false, // 此列不可排序
+    // enableGlobalFilter: false, // 不可搜尋
   },
   {
     accessorKey: 'createTime',
     header: '創建時間',
     cell: (info) => info.getValue(),
-    sortingFn: 'datetime', // 定義排序函數
-    // getCanSort: () => true, // 這列可排序
-    // getIsSorted: (info) => info.column.getIsSorted(), // 根據排序狀態返回
+    // enableGlobalFilter: false, // 不可搜尋
   },
   {
     accessorKey: 'onlineView',
     header: '線上帶看',
-    cell: (info) => info.getValue(),
-    // getCanSort: () => false, // 此列不可排序
     enableSorting: false,
+    // enableGlobalFilter: false, // 不可搜尋
   },
   {
     accessorKey: 'actions',
     header: '操作',
-    cell: (info) => info.getValue(),
     enableSorting: false,
+    // enableGlobalFilter: false, // 不可搜尋
   },
 ]);
 const filter = ref(''); // 搜尋
 const pageSize = ref(10); // 每頁顯示的資料數量
 const currentPage = ref(1); // 當前頁碼
 const totalRecords = ref(0); // 總記錄數
+const route = useRoute();
+const router = useRouter();
 
 // 獲取資料
 const tableData = () => {
@@ -207,9 +214,12 @@ const tableData = () => {
   console.log('當前頁碼:', currentPage.value); // 確認當前頁碼
   console.log('獲取的資料:', paginatedData); // 確認當前頁的資料
   console.log('獲取的所有資料:', totalRecords.value); // 確認所有的資料
+  console.log('total:', total); // 確認所有的資料
 };
 
 onMounted(() => {
+  const pageParam = parseInt(route.params.page) || 1; // 默認為第 1 頁
+  currentPage.value = pageParam; // 設置當前頁碼
   tableData();
 });
 const table = useVueTable({
@@ -227,7 +237,6 @@ const table = useVueTable({
 });
 console.log('columns', columns.value);
 console.log('table columns:', table.getAllColumns()); // 檢查所有的列
-
 const tableRows = computed(() => {
   return table.getRowModel().rows;
 });
@@ -248,7 +257,10 @@ function toggleAll() {
   });
   allSelected.value = newValue;
 }
-
+// 當前頁碼變化時，更新路由
+watch(currentPage, (newPage) => {
+  router.replace({ name: 'memberWorksList', params: { page: newPage } }); // 更新路由
+});
 // 分頁變更事件處理
 function onPageChange(newPage) {
   currentPage.value = newPage; // 更新當前頁碼
@@ -275,8 +287,10 @@ const handleShare = () => {
 
 .tableBox {
   margin: 0 30px 20px;
-  background-color: $text-white-color;
   border-radius: 10px;
+}
+.table-container {
+  background-color: $text-white-color;
 }
 .shareBtn {
   border: 1px solid #eb9717;
@@ -289,5 +303,10 @@ const handleShare = () => {
 }
 .headerRow {
   background-color: #f6f6f6;
+}
+.searchInput {
+  border: 1px solid $danger-color;
+  border-radius: 50px;
+  padding: 8px 15px;
 }
 </style>

@@ -47,9 +47,6 @@ watch(
 </script>
 <style lang="scss" scoped>
 @import '@/assets/style/all.scss';
-.sort-btn {
-  // display: flex;
-}
 .svgIcon {
   width: 11px;
   height: 11px;
