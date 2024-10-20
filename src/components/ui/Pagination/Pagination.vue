@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, defineEmits } from 'vue';
+import { ref, computed, watch } from 'vue';
 import PaginationButton from './PaginationButton.vue'; // 引入上一頁/下一頁按鈕組件
 
 const props = defineProps({

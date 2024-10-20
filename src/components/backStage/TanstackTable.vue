@@ -3,6 +3,8 @@
     <Table>
       <TableHeader>
         <TableRow
+          v-for="headerGroup in table.getHeaderGroups()"
+          :key="headerGroup.id"
           class="headerRow"
           :rowIndex="1"
         >
@@ -15,12 +17,31 @@
               @change="toggleAll"
             />
           </TableHead>
+          <!-- 手動定義排序 -->
           <TableHead
-            v-for="column in columns"
-            :key="column.accessorKey"
+            v-for="header in headerGroup.headers"
+            :key="header.id"
+            scope="col"
           >
-            {{ column.header }}
+            <FlexRender
+              :render="header.column.columnDef.header"
+              :props="header.getContext()"
+            />
+            <sortBtn :header="header"></sortBtn>
           </TableHead>
+          <!-- 自動排序 -->
+          <!-- <TableHead
+            v-for="header in headerGroup.headers"
+            :key="header.id"
+            scope="col"
+            @click="header.column.getToggleSortingHandler()?.($event)"
+          >
+            <FlexRender
+              :render="header.column.columnDef.header"
+              :props="header.getContext()"
+            />
+            <sortBtn :header="header"></sortBtn>
+          </TableHead> -->
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -77,7 +98,7 @@
     </Table>
     <Pagination
       v-model:currentPage="currentPage"
-      :total="data.length"
+      :total="totalRecords"
       :pageSize="pageSize"
       @page-change="onPageChange"
     />
@@ -104,16 +125,15 @@ import {
   useVueTable,
   FlexRender,
   getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getExpandedRowModel,
+  getPaginationRowModel, // 分頁
+  getSortedRowModel, // 排序
+  getFilteredRowModel, // 搜尋
 } from '@tanstack/vue-table';
-// import mockData from '@/mock/index';
 import EditModal from './EditModal.vue';
-import axios from 'axios';
+import { getPaginatedData } from '@/mock/index'; // 引入你的假資料獲取函數
+import sortBtn from '../ui/table/sortBtn.vue';
 
-// 假資料中需包含 selected 屬性
+// 儲存表格資料
 const data = ref([]);
 
 // 定義表格的欄位
@@ -122,6 +142,8 @@ const columns = ref([
     accessorKey: 'workName',
     header: '作品名稱',
     cell: (info) => info.getValue(),
+    // getCanSort: () => false, // 此列不可排序
+    enableSorting: false,
   },
   {
     accessorKey: 'customer',
@@ -134,51 +156,62 @@ const columns = ref([
         h('div', phone), // 電話
       ]);
     },
+    // getCanSort: () => false, // 此列不可排序
+    enableSorting: false,
   },
   {
     accessorKey: 'readCount',
     header: '閱讀次數',
     cell: (info) => info.getValue(),
+    getCanSort: () => true, // 這列可排序
+    // getIsSorted: (info) => info.column.getIsSorted(), // 根據排序狀態返回
   },
   {
     accessorKey: 'status',
     header: '狀態',
     cell: (info) => (info.getValue() ? '公開' : '不公開'),
+    // getCanSort: () => false, // 此列不可排序
   },
   {
     accessorKey: 'createTime',
     header: '創建時間',
     cell: (info) => info.getValue(),
+    sortingFn: 'datetime', // 定義排序函數
+    // getCanSort: () => true, // 這列可排序
+    // getIsSorted: (info) => info.column.getIsSorted(), // 根據排序狀態返回
   },
   {
     accessorKey: 'onlineView',
     header: '線上帶看',
     cell: (info) => info.getValue(),
+    // getCanSort: () => false, // 此列不可排序
+    enableSorting: false,
   },
   {
     accessorKey: 'actions',
     header: '操作',
     cell: (info) => info.getValue(),
+    enableSorting: false,
   },
 ]);
-
-const tableData = async (page = 1) => {
-  try {
-    const response = await axios.get(`/api/table-data?page=${page}`);
-    data.value = response.data.data;
-    console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
+const filter = ref(''); // 搜尋
 const pageSize = ref(10); // 每頁顯示的資料數量
 const currentPage = ref(1); // 當前頁碼
+const totalRecords = ref(0); // 總記錄數
+
+// 獲取資料
+const tableData = () => {
+  const { data: paginatedData, total } = getPaginatedData(currentPage.value); // 獲取分頁資料
+  data.value = paginatedData;
+  totalRecords.value = total; // 更新總記錄數
+  console.log('當前頁碼:', currentPage.value); // 確認當前頁碼
+  console.log('獲取的資料:', paginatedData); // 確認當前頁的資料
+  console.log('獲取的所有資料:', totalRecords.value); // 確認所有的資料
+};
 
 onMounted(() => {
-  tableData(currentPage.value);
+  tableData();
 });
-
 const table = useVueTable({
   data: computed(() => data.value),
   columns: columns.value,
@@ -186,12 +219,19 @@ const table = useVueTable({
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
-  getRowCanExpand: () => true,
-  getExpandedRowModel: getExpandedRowModel(),
+  state: {
+    get globalFilter() {
+      return filter.value;
+    },
+  },
 });
+console.log('columns', columns.value);
+console.log('table columns:', table.getAllColumns()); // 檢查所有的列
+
 const tableRows = computed(() => {
   return table.getRowModel().rows;
 });
+
 // 追蹤是否全選的狀態
 const allSelected = ref(false);
 
@@ -212,17 +252,21 @@ function toggleAll() {
 // 分頁變更事件處理
 function onPageChange(newPage) {
   currentPage.value = newPage; // 更新當前頁碼
-  tableData(newPage);
+  tableData(); // 重新獲取分頁資料
 }
 
 const editModalVisible = ref(false);
 const selectedUserId = ref();
 const handleEdit = (rowId) => {
   editModalVisible.value = !editModalVisible.value;
-  const selectedUser = data.value[rowId]; // 根據行索引獲取用戶資料
+  const selectedUser = data.value.find((user) => user.id === rowId); // 根據行ID獲取用戶資料
   if (selectedUser) {
     selectedUserId.value = selectedUser.id;
   }
+};
+
+const handleShare = () => {
+  console.log('分享功能尚未實現');
 };
 </script>
 

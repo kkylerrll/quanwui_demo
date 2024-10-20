@@ -19,7 +19,7 @@ export default defineConfig({
   server: {
     port: 5174, // 你可以設置你想要的端口
     // 允許從任何主機進行訪問
-    host: true,
+    host: 'localhost',
     // 啟用壓縮
     compress: true,
     // 關閉主機檢查

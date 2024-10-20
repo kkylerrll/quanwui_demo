@@ -17,6 +17,8 @@ const generateUserData = () => {
   };
 };
 
-// 生成 100 筆用戶資料
-const users = Array.from({ length: 100 }, generateUserData);
+// 隨機生成用戶數量，範圍在 100 到 150 之間
+const userCount = Mock.Random.integer(100, 150);
+const users = Array.from({ length: userCount }, generateUserData);
+
 export default users;

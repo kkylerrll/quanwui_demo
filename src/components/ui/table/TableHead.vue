@@ -6,6 +6,4 @@
 
 <script setup></script>
 
-<style scoped>
-/* 自定義標題單元格樣式 */
-</style>
+<style lang="scss" scoped></style>

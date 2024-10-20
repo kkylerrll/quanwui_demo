@@ -126,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, onMounted, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
@@ -231,6 +231,8 @@ function onSubmit() {
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/style/all.scss';
+
 .v-dialog {
   .v-overlay__content {
     .v-card {

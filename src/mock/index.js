@@ -22,10 +22,7 @@ Mock.setup({
 });
 
 // 分頁 API 模擬函數
-Mock.mock(/\/api\/table-data\?page=\d+/, 'get', (options) => {
-  const urlParams = new URLSearchParams(options.url.split('?')[1]);
-  const page = parseInt(urlParams.get('page'), 10) || 1;
-
+const getPaginatedData = (page) => {
   const total = mockTableData.length; // 總共幾筆資料
   const totalPages = Math.ceil(total / pageSize); // 總頁數
 
@@ -36,18 +33,14 @@ Mock.mock(/\/api\/table-data\?page=\d+/, 'get', (options) => {
   // 當前頁數據
   const pageData = mockTableData.slice(startIndex, endIndex);
 
-  // 返回模擬的 API 數據
   return {
-    code: 1,
-    msg: 'success',
-    data: {
-      data: pageData, // 當前頁的數據
-      total, // 總共幾筆資料
-      per_page: pageSize, // 每頁幾筆
-      current_page: page, // 當前頁碼
-      last_page: totalPages, // 總頁數
-    },
+    data: pageData, // 當前頁的數據
+    total, // 總共幾筆資料
+    per_page: pageSize, // 每頁幾筆
+    current_page: page, // 當前頁碼
+    last_page: totalPages, // 總頁數
   };
-});
+};
 
-export default mockTableData;
+// 將 mockTableData 和 getPaginatedData 函數匯出
+export { mockTableData, getPaginatedData };
