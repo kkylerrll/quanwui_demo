@@ -140,7 +140,7 @@ import {
   getFilteredRowModel, // 搜尋
 } from '@tanstack/vue-table';
 import EditModal from './EditModal.vue';
-import { getPaginatedData } from '@/mock/index'; // 引入你的假資料獲取函數
+import { getPaginatedData } from '@/mock/index'; // 引入假資料獲取函數
 import sortBtn from '../ui/table/sortBtn.vue';
 import { useRoute, useRouter } from 'vue-router';
 
