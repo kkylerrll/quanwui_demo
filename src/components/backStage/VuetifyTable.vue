@@ -9,9 +9,11 @@
       singleLine
     ></v-text-field>
     <v-data-table
+      v-model="selected"
       :headers="headers"
       :items="currentItems"
       :search="search"
+      show-select
     >
       <!-- 自定義 customer 欄位顯示 -->
       <template #item.customer="{ item }">
@@ -38,29 +40,34 @@ const search = ref('');
 // 表格 headers
 const headers = [
   {
-    aling: 'start',
+    align: 'center',
     key: 'workName',
     title: '作品名稱',
     sortable: false,
   },
   {
+    align: 'center',
     key: 'customer',
     title: '客戶',
     sortable: false,
   },
   {
+    align: 'center',
     key: 'readCount',
     title: '閱讀次數',
   },
   {
+    align: 'center',
     key: 'status',
     title: '狀態',
   },
   {
+    align: 'center',
     key: 'createTime',
     title: '創建時間',
   },
   {
+    align: 'center',
     key: 'onlineView',
     title: '線上帶看',
     sortable: false,
