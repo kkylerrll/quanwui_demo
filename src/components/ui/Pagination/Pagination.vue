@@ -34,7 +34,7 @@
         type="number"
         class="jumpBtn text-center"
         :placeholder="'跳轉至第幾頁'"
-        @keyup.enter="goToPage(pageInput)"
+        @input="goToPage(pageInput)"
       />
       <p>頁</p>
     </div>
