@@ -2,9 +2,13 @@
   <div class="flex-1">
     <v-text-field
       v-model="search"
-      label="Search"
+      placeholder="請輸入作品名稱"
       prependInnerIcon="mdi-magnify"
       variant="outlined"
+      :append-inner-icon="searceIcon"
+      prepend-inner-icon=""
+      rounded="xl"
+      width="250"
       hide-details
       single-line
     ></v-text-field>
@@ -13,17 +17,10 @@
       :headers="headers"
       :items="currentItems"
       :search="search"
+      :sort-asc-icon="SvgIconAsc"
+      :sort-desc-icon="SvgIconDesc"
       show-select
     >
-      <template #column.sort-desc>
-        <!-- 自定義降序圖標 -->
-        <svgIcon name="sortDown" />
-      </template>
-
-      <template #column.sort-asc>
-        <!-- 自定義升序圖標 -->
-        <svgIcon name="sortUp" />
-      </template>
       <!-- 自定義 customer 欄位顯示 -->
       <template #item.customer="{ item }">
         <span>
@@ -39,6 +36,11 @@
             :length="lastPage"
             rounded="circle"
             :total-visible="6"
+            :prev-icon="paginationPrev"
+            :next-icon="paginationNext"
+            active-color="#015C61"
+            color="#A7A7A7"
+            border="sm"
             @update:model-value="onPageChange"
           ></v-pagination>
           <div class="flex items-center">
@@ -60,9 +62,10 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, h } from 'vue';
 import { getPaginatedData } from '@/mock/index'; // 引入假資料獲取函數
 import { useRoute, useRouter } from 'vue-router';
+import svgIcon from '@/components/common/SvgIcon.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -111,10 +114,28 @@ const headers = [
     sortable: false,
   },
 ];
+
+const SvgIconAsc = () => h(svgIcon, { name: 'sortUp', class: 'sortIcon' });
+const SvgIconDesc = () => h(svgIcon, { name: 'sortDown', class: 'sortIcon' });
+const paginationNext = () => h(svgIcon, { name: 'right' });
+const paginationPrev = () => h(svgIcon, { name: 'left' });
+const searceIcon = () => h(svgIcon, { name: 'search', class: 'searchIcon' });
+
+onMounted(() => {
+  const newPage = Number(route.params.page) || 1;
+  page.value = newPage;
+  fetchData();
+});
+
+// 當前頁碼變化時，更新路由
+watch(page, (newPage) => {
+  router.replace({ name: 'memberWorksTemplate', params: { page: newPage } }); // 更新路由
+});
+
 // 當頁碼變化時更新路由並重新獲取數據
 const onPageChange = (newPage) => {
   page.value = newPage;
-  router.push({ name: 'memberWorksTemplate', params: { page: newPage } }); // 更新路由中的頁碼
+  pageInput.value = newPage;
   fetchData(); // 獲取對應頁碼的數據
 };
 
@@ -136,23 +157,9 @@ const fetchData = () => {
 const goToPage = () => {
   if (pageInput.value >= 1 && pageInput.value <= lastPage.value) {
     page.value = pageInput.value; // 更新當前頁碼
-    router.push({
-      name: 'memberWorksTemplate',
-      params: { page: pageInput.value },
-    }); // 更新路由中的頁碼
-
     fetchData(); // 獲取該頁面的數據
   }
 };
-// 當路由中的頁碼變化時監聽並更新表格
-watch(route, () => {
-  const newPage = Number(route.params.page) || 1;
-  page.value = newPage;
-  fetchData();
-});
-onMounted(() => {
-  fetchData();
-});
 </script>
 
 <style lang="scss" scoped>
@@ -160,5 +167,16 @@ onMounted(() => {
 
 .v-data-table-header__content {
   justify-content: center;
+}
+
+:deep(.searchIcon) {
+  background: $primary-color;
+  padding: 7px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50px;
+}
+:deep(.sortIcon) {
+  fill: $primary-color;
 }
 </style>
