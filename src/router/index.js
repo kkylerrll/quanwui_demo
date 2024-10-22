@@ -29,7 +29,7 @@ const router = createRouter({
           component: () => import('@/components/backStage/TanstackTable.vue'),
         },
         {
-          path: 'vuetifyTable',
+          path: 'vuetifyTable/:page?',
           name: 'memberWorksTemplate',
           meta: {
             title: 'vuetifyTable',

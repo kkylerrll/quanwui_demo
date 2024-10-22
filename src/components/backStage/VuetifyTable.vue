@@ -39,7 +39,7 @@
             :length="lastPage"
             rounded="circle"
             :total-visible="6"
-            @update:model-value="fetchData"
+            @update:model-value="onPageChange"
           ></v-pagination>
           <div class="flex items-center">
             <p>跳轉至:</p>
@@ -60,9 +60,12 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { getPaginatedData } from '@/mock/index'; // 引入假資料獲取函數
+import { useRoute, useRouter } from 'vue-router';
 
+const router = useRouter();
+const route = useRoute();
 // const itemsPerPage = ref('10'); // 每頁顯示的資料數
 const page = ref(1); // 當前的頁碼
 const pageInput = ref(page.value); // 用於跳轉的頁碼輸入框
@@ -108,6 +111,12 @@ const headers = [
     sortable: false,
   },
 ];
+// 當頁碼變化時更新路由並重新獲取數據
+const onPageChange = (newPage) => {
+  page.value = newPage;
+  router.push({ name: 'memberWorksTemplate', params: { page: newPage } }); // 更新路由中的頁碼
+  fetchData(); // 獲取對應頁碼的數據
+};
 
 // 獲取數據
 const fetchData = () => {
@@ -127,9 +136,20 @@ const fetchData = () => {
 const goToPage = () => {
   if (pageInput.value >= 1 && pageInput.value <= lastPage.value) {
     page.value = pageInput.value; // 更新當前頁碼
+    router.push({
+      name: 'memberWorksTemplate',
+      params: { page: pageInput.value },
+    }); // 更新路由中的頁碼
+
     fetchData(); // 獲取該頁面的數據
   }
 };
+// 當路由中的頁碼變化時監聽並更新表格
+watch(route, () => {
+  const newPage = Number(route.params.page) || 1;
+  page.value = newPage;
+  fetchData();
+});
 onMounted(() => {
   fetchData();
 });
