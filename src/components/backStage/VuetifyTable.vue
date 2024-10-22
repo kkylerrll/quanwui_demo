@@ -3,10 +3,8 @@
     <v-text-field
       v-model="search"
       placeholder="請輸入作品名稱"
-      prependInnerIcon="mdi-magnify"
       variant="outlined"
       :append-inner-icon="searceIcon"
-      prepend-inner-icon=""
       rounded="xl"
       width="250"
       hide-details
@@ -19,6 +17,7 @@
       :search="search"
       :sort-asc-icon="SvgIconAsc"
       :sort-desc-icon="SvgIconDesc"
+      item-value="workName"
       show-select
     >
       <!-- 自定義 customer 欄位顯示 -->
@@ -50,7 +49,6 @@
               type="number"
               min="1"
               :max="lastPage"
-              class="ml-2 text-center"
               hide-details
               @change="goToPage"
             ></v-text-field>
@@ -59,6 +57,7 @@
         </div>
       </template>
     </v-data-table>
+    <pre>{{ selected }}</pre>
   </div>
 </template>
 <script setup>
@@ -144,7 +143,6 @@ const fetchData = () => {
   const { data, total: totalItems, last_page } = getPaginatedData(page.value);
   currentItems.value = data.map((item) => ({
     ...item,
-    // customer: `${item.name}<br>${item.phone}`,
   }));
   total.value = totalItems;
   lastPage.value = last_page;
