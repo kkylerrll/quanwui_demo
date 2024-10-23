@@ -52,7 +52,7 @@ const props = defineProps({
   },
   pageSize: {
     type: Number,
-    default: 10,
+    default: 1,
   },
 });
 
@@ -60,7 +60,7 @@ const emit = defineEmits(['pageChange']);
 const currentPage = ref(1);
 const pageInput = ref(currentPage.value);
 
-const pageCount = computed(() => Math.ceil(props.total / props.pageSize));
+const pageCount = computed(() => props.pageSize);
 // 監控 currentPage 的變化，以便同步更新輸入框
 watch(currentPage, (newPage) => {
   pageInput.value = newPage;

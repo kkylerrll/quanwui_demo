@@ -18,27 +18,34 @@ const pageSize = 10;
 
 // 設定模擬 API 的延遲時間 (單位是毫秒)，這裡設置為 500ms 延遲
 Mock.setup({
-  timeout: '500-1000', // 模擬 API 回應的延遲時間範圍為 500-1000ms
+  timeout: '500-1000',
 });
 
-// 分頁 API 模擬函數
-const getPaginatedData = (page) => {
-  const total = mockTableData.length; // 總共幾筆資料
-  const totalPages = Math.ceil(total / pageSize); // 總頁數
+// 分頁、排序、搜尋 API 模擬函數
+const getPaginatedData = (page, workName, sortField, sortOrder) => {
+  const filteredData = mockTableData.filter((item) =>
+    workName ? item.workName.includes(workName) : true,
+  );
 
-  // 計算當前頁的數據範圍
+  const sortedData = filteredData.sort((a, b) => {
+    if (sortField) {
+      if (sortOrder === 'asc') return a[sortField] > b[sortField] ? 1 : -1;
+      if (sortOrder === 'desc') return a[sortField] < b[sortField] ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const total = sortedData.length;
+  const totalPages = Math.ceil(total / pageSize);
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
 
-  // 當前頁數據
-  const pageData = mockTableData.slice(startIndex, endIndex);
-
   return {
-    data: pageData, // 當前頁的數據
-    total, // 總共幾筆資料
-    per_page: pageSize, // 每頁幾筆
-    current_page: page, // 當前頁碼
-    last_page: totalPages, // 總頁數
+    data: sortedData.slice(startIndex, endIndex),
+    total,
+    per_page: pageSize,
+    current_page: page,
+    last_page: totalPages,
   };
 };
 

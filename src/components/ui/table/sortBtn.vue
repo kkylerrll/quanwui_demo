@@ -24,22 +24,20 @@ const props = defineProps({
 });
 const isAsc = ref(false);
 const isDesc = ref(false);
-console.log('sortBtn', props.header);
 const setSort = (direction) => {
   if (direction === 'asc') {
     isAsc.value = true;
     isDesc.value = false;
-    props.header.column.toggleSorting(false);
   } else if (direction === 'desc') {
     isAsc.value = false;
     isDesc.value = true;
-    props.header.column.toggleSorting(true);
   }
 };
 // 監聽 header 的排序狀態變化，更新按鈕的狀態
 watch(
   () => props.header.column.getIsSorted(),
   (newSort) => {
+    console.log('newSort', newSort);
     isAsc.value = newSort === 'asc';
     isDesc.value = newSort === 'desc';
   },

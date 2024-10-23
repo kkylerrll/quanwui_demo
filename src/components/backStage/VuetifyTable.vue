@@ -4,7 +4,7 @@
       v-model="search"
       placeholder="請輸入作品名稱"
       variant="outlined"
-      :append-inner-icon="searceIcon"
+      :append-inner-icon="searchIcon"
       rounded="xl"
       width="250"
       hide-details
@@ -19,6 +19,7 @@
       :sort-desc-icon="SvgIconDesc"
       item-value="workName"
       show-select
+      @update:sort-by="handleSorting"
     >
       <!-- 自定義 customer 欄位顯示 -->
       <template #item.customer="{ item }">
@@ -58,6 +59,7 @@
       </template>
     </v-data-table>
     <pre>{{ selected }}</pre>
+    <pre>{{ sorting }}</pre>
   </div>
 </template>
 <script setup>
@@ -76,6 +78,10 @@ const lastPage = ref(0); // 總頁數
 const currentItems = ref([]); // 表格內容，當前頁數資料
 const search = ref('');
 const selected = ref([]); // 已選項目
+const filter = ref(''); // 搜尋
+const sorting = ref([]); // 排序總資料
+const sortOrder = ref(null); // 排序 升序 or 降序
+const sortField = ref(null); // 排序 排序欄位
 
 // 表格 headers
 const headers = [
@@ -118,7 +124,7 @@ const SvgIconAsc = () => h(svgIcon, { name: 'sortUp', class: 'sortIcon' });
 const SvgIconDesc = () => h(svgIcon, { name: 'sortDown', class: 'sortIcon' });
 const paginationNext = () => h(svgIcon, { name: 'right' });
 const paginationPrev = () => h(svgIcon, { name: 'left' });
-const searceIcon = () => h(svgIcon, { name: 'search', class: 'searchIcon' });
+const searchIcon = () => h(svgIcon, { name: 'search', class: 'searchIcon' });
 
 onMounted(() => {
   const newPage = Number(route.params.page) || 1;
@@ -140,7 +146,16 @@ const onPageChange = (newPage) => {
 
 // 獲取數據
 const fetchData = () => {
-  const { data, total: totalItems, last_page } = getPaginatedData(page.value);
+  const {
+    data,
+    total: totalItems,
+    last_page,
+  } = getPaginatedData(
+    page.value,
+    filter.value,
+    sortField.value,
+    sortOrder.value,
+  ); // 獲取分頁資料
   currentItems.value = data.map((item) => ({
     ...item,
   }));
@@ -157,6 +172,13 @@ const goToPage = () => {
     page.value = pageInput.value; // 更新當前頁碼
     fetchData(); // 獲取該頁面的數據
   }
+};
+const handleSorting = (newVal) => {
+  sorting.value = newVal;
+  sortField.value = newVal[0]?.key;
+  sortOrder.value = newVal[0]?.order;
+  fetchData();
+  console.log('sorting:', sorting.value[0]?.key);
 };
 </script>
 

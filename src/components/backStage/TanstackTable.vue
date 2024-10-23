@@ -6,6 +6,7 @@
         type="text"
         placeholder="請輸入作品名稱"
         class="searchInput"
+        @input="table.setGlobalFilter(String($event.target.value))"
       />
     </div>
     <div class="table-container">
@@ -26,11 +27,12 @@
                 @change="toggleAll"
               />
             </TableHead>
-            <!-- 手動定義排序 -->
+            <!-- 自動排序 -->
             <TableHead
               v-for="header in headerGroup.headers"
               :key="header.id"
               scope="col"
+              @click="header.column.getToggleSortingHandler()?.($event)"
             >
               <FlexRender
                 :render="header.column.columnDef.header"
@@ -38,19 +40,6 @@
               />
               <sortBtn :header="header"></sortBtn>
             </TableHead>
-            <!-- 自動排序 -->
-            <!-- <TableHead
-            v-for="header in headerGroup.headers"
-            :key="header.id"
-            scope="col"
-            @click="header.column.getToggleSortingHandler()?.($event)"
-          >
-            <FlexRender
-              :render="header.column.columnDef.header"
-              :props="header.getContext()"
-            />
-            <sortBtn :header="header"></sortBtn>
-          </TableHead> -->
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -108,7 +97,7 @@
       <Pagination
         v-model:currentPage="currentPage"
         :total="totalRecords"
-        :pageSize="pageSize"
+        :pageSize="totalPage"
         @page-change="onPageChange"
       />
     </div>
@@ -143,7 +132,12 @@ import EditModal from './EditModal.vue';
 import { getPaginatedData } from '@/mock/index'; // 引入假資料獲取函數
 import sortBtn from '../ui/table/sortBtn.vue';
 import { useRoute, useRouter } from 'vue-router';
+import debounce from 'lodash.debounce'; // 引入防抖函數
 
+// 防抖函數，延遲 300 毫秒後再呼叫 tableData
+const debouncedTableData = debounce(() => {
+  tableData();
+}, 400);
 // 儲存表格資料
 const data = ref([]);
 
@@ -200,28 +194,54 @@ const columns = ref([
   },
 ]);
 const filter = ref(''); // 搜尋
-const pageSize = ref(10); // 每頁顯示的資料數量
+const sorting = ref([]); // 排序總資料
+const sortOrder = ref(null); // 排序 升序 or 降序
+const sortField = ref(null); // 排序 排序欄位
+const pageSize = ref(1); // 每頁顯示的資料數量
 const currentPage = ref(1); // 當前頁碼
-const totalRecords = ref(0); // 總記錄數
+const totalRecords = ref(0); // 資料的總數量
 const route = useRoute();
 const router = useRouter();
-
+const allSelected = ref(false); // 追蹤是否全選的狀態
+const totalPage = ref(1); // 所有的頁數
 // 獲取資料
 const tableData = () => {
-  const { data: paginatedData, total } = getPaginatedData(currentPage.value); // 獲取分頁資料
+  const {
+    data: paginatedData,
+    total,
+    per_page,
+    last_page,
+  } = getPaginatedData(
+    currentPage.value,
+    filter.value,
+    sortField.value,
+    sortOrder.value,
+  ); // 獲取分頁資料
   data.value = paginatedData;
-  totalRecords.value = total; // 更新總記錄數
+  totalRecords.value = total; // 更新資料的總數量
+  pageSize.value = per_page; // 更新每頁資料數量
+  totalPage.value = last_page; // 更新所有的頁數
   console.log('當前頁碼:', currentPage.value); // 確認當前頁碼
   console.log('獲取的資料:', paginatedData); // 確認當前頁的資料
   console.log('獲取的所有資料:', totalRecords.value); // 確認所有的資料
-  console.log('total:', total); // 確認所有的資料
+  console.log('所有頁碼', last_page);
 };
+
+// 當前頁碼變化時，更新路由
+watch(currentPage, (newPage) => {
+  router.replace({ name: 'memberWorksList', params: { page: newPage } }); // 更新路由
+});
+// 監控所有行的選擇狀態
+watch(data, (newData) => {
+  allSelected.value = newData.every((item) => item.selected);
+});
 
 onMounted(() => {
   const pageParam = parseInt(route.params.page) || 1; // 默認為第 1 頁
   currentPage.value = pageParam; // 設置當前頁碼
   tableData();
 });
+
 const table = useVueTable({
   data: computed(() => data.value),
   columns: columns.value,
@@ -233,20 +253,32 @@ const table = useVueTable({
     get globalFilter() {
       return filter.value;
     },
+    get sorting() {
+      return sorting.value;
+    },
+  },
+  onSortingChange: (updaterOrValue) => {
+    sorting.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(sorting.value)
+        : updaterOrValue;
+    const currentSort = sorting.value[0];
+    sortField.value = currentSort?.id || null; // 獲取當前排序欄位
+    sortOrder.value = currentSort?.desc ? 'desc' : 'asc'; // 獲取當前排序方向
+    tableData();
+  },
+  onGlobalFilterChange: (updaterOrValue) => {
+    filter.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(filter.value)
+        : updaterOrValue;
+    debouncedTableData();
   },
 });
 console.log('columns', columns.value);
 console.log('table columns:', table.getAllColumns()); // 檢查所有的列
 const tableRows = computed(() => {
   return table.getRowModel().rows;
-});
-
-// 追蹤是否全選的狀態
-const allSelected = ref(false);
-
-// 監控所有行的選擇狀態
-watch(data, (newData) => {
-  allSelected.value = newData.every((item) => item.selected);
 });
 
 // 切換全選
@@ -257,10 +289,7 @@ function toggleAll() {
   });
   allSelected.value = newValue;
 }
-// 當前頁碼變化時，更新路由
-watch(currentPage, (newPage) => {
-  router.replace({ name: 'memberWorksList', params: { page: newPage } }); // 更新路由
-});
+
 // 分頁變更事件處理
 function onPageChange(newPage) {
   currentPage.value = newPage; // 更新當前頁碼
