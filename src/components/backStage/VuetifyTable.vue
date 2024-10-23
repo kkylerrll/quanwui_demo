@@ -9,6 +9,7 @@
       width="250"
       hide-details
       single-line
+      @update:model-value="handleFilter"
     ></v-text-field>
     <v-data-table
       v-model="selected"
@@ -179,6 +180,10 @@ const handleSorting = (newVal) => {
   sortOrder.value = newVal[0]?.order;
   fetchData();
   console.log('sorting:', sorting.value[0]?.key);
+};
+const handleFilter = (newVal) => {
+  filter.value = newVal;
+  fetchData();
 };
 </script>
 
