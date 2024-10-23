@@ -147,7 +147,7 @@ const columns = ref([
     accessorKey: 'workName',
     header: '作品名稱',
     enableSorting: false, // 不可排序
-    // enableGlobalFilter: true, // 可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'customer',
@@ -162,35 +162,41 @@ const columns = ref([
     },
     enableSorting: false,
     // enableGlobalFilter: true, // 不可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'readCount',
     header: '閱讀次數',
     // enableGlobalFilter: false, // 不可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'status',
     header: '狀態',
     cell: (info) => (info.getValue() ? '公開' : '不公開'),
     // enableGlobalFilter: false, // 不可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'createTime',
     header: '創建時間',
     cell: (info) => info.getValue(),
     // enableGlobalFilter: false, // 不可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'onlineView',
     header: '線上帶看',
     enableSorting: false,
     // enableGlobalFilter: false, // 不可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'actions',
     header: '操作',
     enableSorting: false,
     // enableGlobalFilter: false, // 不可搜尋
+    enableGlobalFilter: true, // 可搜尋
   },
 ]);
 const filter = ref(''); // 搜尋
