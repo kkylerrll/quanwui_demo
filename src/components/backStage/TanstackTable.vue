@@ -1,14 +1,7 @@
 <template>
   <div class="tableBox flex flex-1 flex-col">
-    <div class="flex justify-end">
-      <input
-        v-model="filter"
-        type="text"
-        placeholder="請輸入作品名稱"
-        class="searchInput"
-        @input="table.setGlobalFilter(String($event.target.value))"
-      />
-    </div>
+    <FilterComponent :table="table"></FilterComponent>
+
     <div class="table-container">
       <Table>
         <TableHeader>
@@ -102,11 +95,6 @@
       />
     </div>
   </div>
-  <EditModal
-    v-model="editModalVisible"
-    title="基本設定"
-    :userId="selectedUserId"
-  ></EditModal>
 </template>
 
 <script setup>
@@ -128,11 +116,11 @@ import {
   getSortedRowModel, // 排序
   getFilteredRowModel, // 搜尋
 } from '@tanstack/vue-table';
-import EditModal from './EditModal.vue';
-import { getPaginatedData } from '@/mock/index'; // 引入假資料獲取函數
+import { getAllOrder } from '@/mock/index'; // 引入假資料獲取函數
 import sortBtn from '../ui/table/sortBtn.vue';
 import { useRoute, useRouter } from 'vue-router';
 import debounce from 'lodash.debounce'; // 引入防抖函數
+import FilterComponent from './FilterComponent.vue';
 
 // 防抖函數，延遲 300 毫秒後再呼叫 tableData
 const debouncedTableData = debounce(() => {
@@ -140,7 +128,6 @@ const debouncedTableData = debounce(() => {
 }, 400);
 // 儲存表格資料
 const data = ref([]);
-
 // 定義表格的欄位
 const columns = ref([
   {
@@ -161,45 +148,43 @@ const columns = ref([
       ]);
     },
     enableSorting: false,
-    // enableGlobalFilter: true, // 不可搜尋
     enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'readCount',
     header: '閱讀次數',
-    // enableGlobalFilter: false, // 不可搜尋
     enableGlobalFilter: true, // 可搜尋
+    enableColumnFilter: true, // 啟用列過濾
   },
   {
     accessorKey: 'status',
     header: '狀態',
-    cell: (info) => (info.getValue() ? '公開' : '不公開'),
+    cell: (info) => (info.getValue() === '0' ? '公開' : '不公開'),
     // enableGlobalFilter: false, // 不可搜尋
-    enableGlobalFilter: true, // 可搜尋
+    enableColumnFilter: true, // 啟用列過濾
   },
   {
     accessorKey: 'createTime',
     header: '創建時間',
     cell: (info) => info.getValue(),
-    // enableGlobalFilter: false, // 不可搜尋
     enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'onlineView',
     header: '線上帶看',
     enableSorting: false,
-    // enableGlobalFilter: false, // 不可搜尋
     enableGlobalFilter: true, // 可搜尋
   },
   {
     accessorKey: 'actions',
     header: '操作',
     enableSorting: false,
-    // enableGlobalFilter: false, // 不可搜尋
-    enableGlobalFilter: true, // 可搜尋
   },
 ]);
 const filter = ref(''); // 搜尋
+const filterStatus = ref(''); // 狀態列篩選
+const filterReadCountMin = ref(''); // 閱讀次數列篩選
+const filterReadCountMax = ref(''); // 閱讀次數列篩選
 const sorting = ref([]); // 排序總資料
 const sortOrder = ref(null); // 排序 升序 or 降序
 const sortField = ref(null); // 排序 排序欄位
@@ -210,27 +195,35 @@ const route = useRoute();
 const router = useRouter();
 const allSelected = ref(false); // 追蹤是否全選的狀態
 const totalPage = ref(1); // 所有的頁數
+
+const columnFilters = computed(() => {
+  const filters = [];
+  if (filterStatus.value)
+    filters.push({ id: 'status', value: filterStatus.value });
+  if (filterReadCountMin.value)
+    filters.push({ id: 'readCount', value: filterReadCountMin.value });
+  if (filterReadCountMax.value)
+    filters.push({ id: 'readCount', value: filterReadCountMax.value });
+  return filters;
+}); // 列過濾
+
 // 獲取資料
-const tableData = () => {
-  const {
-    data: paginatedData,
-    total,
-    per_page,
-    last_page,
-  } = getPaginatedData(
+const tableData = async () => {
+  const response = getAllOrder(
     currentPage.value,
     filter.value,
     sortField.value,
     sortOrder.value,
-  ); // 獲取分頁資料
-  data.value = paginatedData;
-  totalRecords.value = total; // 更新資料的總數量
-  pageSize.value = per_page; // 更新每頁資料數量
-  totalPage.value = last_page; // 更新所有的頁數
+    filterStatus.value,
+  );
+  data.value = response.data;
+  totalRecords.value = response.total;
+  pageSize.value = response.per_page;
+  totalPage.value = response.last_page;
   console.log('當前頁碼:', currentPage.value); // 確認當前頁碼
-  console.log('獲取的資料:', paginatedData); // 確認當前頁的資料
+  console.log('獲取的資料:', data.value); // 確認當前頁的資料
   console.log('獲取的所有資料:', totalRecords.value); // 確認所有的資料
-  console.log('所有頁碼', last_page);
+  console.log('所有頁碼', totalPage.value);
 };
 
 // 當前頁碼變化時，更新路由
@@ -262,6 +255,9 @@ const table = useVueTable({
     get sorting() {
       return sorting.value;
     },
+    get columnFilters() {
+      return columnFilters.value;
+    },
   },
   onSortingChange: (updaterOrValue) => {
     sorting.value =
@@ -279,6 +275,18 @@ const table = useVueTable({
         ? updaterOrValue(filter.value)
         : updaterOrValue;
     debouncedTableData();
+    console.log(filter.value);
+  },
+  onColumnFiltersChange: (updaterOrValue) => {
+    filterStatus.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(filterStatus.value)
+            .map((status) => status.value)
+            .toString()
+        : updaterOrValue;
+    tableData();
+    console.log('filterStatus', filterStatus.value);
+    console.log('columnFilters', columnFilters.value);
   },
 });
 console.log('columns', columns.value);
@@ -315,6 +323,13 @@ const handleEdit = (rowId) => {
 const handleShare = () => {
   console.log('分享功能尚未實現');
 };
+
+// function handleFilterStatus(status) {
+//   filterStatus.value = status; // 更新狀態
+//   tableData();
+//   console.log('filterStatus', filterStatus.value);
+//   console.log('columnFilters', columnFilters.value);
+// }
 </script>
 
 <style lang="scss" scoped>

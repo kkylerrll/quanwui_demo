@@ -65,7 +65,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch, h } from 'vue';
-import { getPaginatedData } from '@/mock/index'; // 引入假資料獲取函數
+import { getAllOrder } from '@/mock/index'; // 引入假資料獲取函數
 import { useRoute, useRouter } from 'vue-router';
 import svgIcon from '@/components/common/SvgIcon.vue';
 
@@ -151,12 +151,7 @@ const fetchData = () => {
     data,
     total: totalItems,
     last_page,
-  } = getPaginatedData(
-    page.value,
-    filter.value,
-    sortField.value,
-    sortOrder.value,
-  ); // 獲取分頁資料
+  } = getAllOrder(page.value, filter.value, sortField.value, sortOrder.value); // 獲取分頁資料
   currentItems.value = data.map((item) => ({
     ...item,
   }));

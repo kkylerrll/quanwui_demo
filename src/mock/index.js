@@ -8,7 +8,8 @@ const mockTableData = userData.map((user, index) => ({
   checkbox: Mock.Random.boolean(),
   workName: Mock.Random.ctitle(5, 10),
   readCount: Mock.Random.integer(0, 200000),
-  status: Mock.Random.boolean(),
+  // status: Mock.Random.boolean().toString(),
+  status: Mock.Random.pick(['0', '1']),
   createTime: Mock.Random.date('yyyy-MM-dd HH:mm:ss'),
   onlineView: Mock.Random.boolean(),
 }));
@@ -22,10 +23,32 @@ Mock.setup({
 });
 
 // 分頁、排序、搜尋 API 模擬函數
-const getPaginatedData = (page, workName, sortField, sortOrder) => {
-  const filteredData = mockTableData.filter((item) =>
-    workName ? item.workName.includes(workName) : true,
-  );
+const getAllOrder = (
+  page,
+  searchTerm,
+  sortField,
+  sortOrder,
+  status,
+  minValue,
+  maxValue,
+) => {
+  let filteredData = mockTableData.filter((item) => {
+    // 檢查所有欄位是否符合搜尋條件
+    const matchesSearch = Object.keys(item).some((key) =>
+      String(item[key])
+        .toLowerCase()
+        .includes(String(searchTerm).toLowerCase()),
+    );
+
+    // 檢查狀態欄位是否符合條件 (如果有提供 status)
+    const matchesStatus = status ? item.status === status : true;
+    // 檢查數值欄位是否在 minValue 和 maxValue 的範圍內
+    const matchesValueRange =
+      minValue !== undefined && maxValue !== undefined
+        ? item.readCount >= minValue && item.readCount <= maxValue
+        : true;
+    return matchesSearch && matchesStatus && matchesValueRange;
+  });
 
   const sortedData = filteredData.sort((a, b) => {
     if (sortField) {
@@ -49,5 +72,5 @@ const getPaginatedData = (page, workName, sortField, sortOrder) => {
   };
 };
 
-// 將 mockTableData 和 getPaginatedData 函數匯出
-export { mockTableData, getPaginatedData };
+// 將 mockTableData 和 getAllOrder 函數匯出
+export { mockTableData, getAllOrder };
