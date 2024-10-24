@@ -26,10 +26,8 @@
       <label for="minValue">最小值:</label>
       <input
         id="minValue"
-        v-model.number="columnFilterValue"
-        :min="props.column.getFacetedMinMaxValues ? [0] : ''"
-        :max="props.column.getFacetedMinMaxValues ? [1] : ''"
-        type="number"
+        v-model.number="minValue"
+        type="text"
         placeholder="輸入最小值"
         class="rounded-md px-2 py-1 border border-gray-700"
       />
@@ -43,7 +41,7 @@
       <input
         id="maxValue"
         v-model.number="maxValue"
-        type="number"
+        type="text"
         placeholder="輸入最大值"
         class="rounded-md px-2 py-1 border border-gray-700"
       />
@@ -58,23 +56,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 // import DebouncedInput from './DebouncedInput.vue';
 const props = defineProps({
   table: {
     type: Object,
     required: true,
   },
-  column: {
-    type: Object,
-    required: true,
-  },
 });
 const filter = ref('');
 const filterStatus = ref('');
-const minValue = ref(props.column.getFacetedMinMaxValues ? [0] : '');
-const maxValue = ref(props.column.getFacetedMinMaxValues ? [1] : '');
-console.log('column', props.column);
+const minValue = ref('');
+const maxValue = ref('');
 
 // const emit = defineEmits(['update:filterStatus']);
 // function updateFilterStatus() {
@@ -82,17 +75,50 @@ console.log('column', props.column);
 //   props.table.setColumnFilters();
 //   emit('update:filterStatus', filterStatus.value);
 // }
-const columnFilterValue = computed(() => props.column.getFilterValue());
+// function handleSearch() {
+//   if (filterStatus.value) {
+//     console.log('ok');
+//     props.table.setColumnFilters([{ id: 'status', value: filterStatus.value }]);
+//   }
+//   if (minValue.value) {
+//     console.log('minValue', minValue.value.toString());
+//     props.table.setColumnFilters([
+//       { id: 'readCount', value: { min: minValue.value.toString() } },
+//     ]);
+//   }
+//   if (maxValue.value) {
+//     console.log('maxValue', maxValue.value.toString());
+//     props.table.setColumnFilters([
+//       { id: 'readCount', value: { max: maxValue.value.toString() } },
+//     ]);
+//   }
+// }
 
 function handleSearch() {
+  const filters = []; // 用來存儲所有過濾器
+
+  // 狀態過濾
   if (filterStatus.value) {
     console.log('ok');
-    props.table.setColumnFilters([{ id: 'status', value: filterStatus.value }]);
+    filters.push({ id: 'status', value: filterStatus.value });
   }
-  if (minValue.value) {
-    console.log('min', minValue.value);
+
+  // 閱讀次數篩選
+  if (minValue.value !== null) {
+    // 確保最小值存在
+    console.log('minValue', minValue.value.toString());
+    filters.push({ id: 'readCount', value: minValue.value.toString() });
   }
-  console.log('columnFilterValue', columnFilterValue);
+
+  if (maxValue.value !== null) {
+    // 確保最大值存在
+    console.log('maxValue', maxValue.value.toString());
+    filters.push({ id: 'readCount', value: maxValue.value.toString() });
+  }
+
+  // 設定所有過濾器
+  props.table.setColumnFilters(filters);
+  console.log('Current filters:', filters); // 打印當前過濾器狀態
 }
 </script>
 
