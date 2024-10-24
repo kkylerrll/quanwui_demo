@@ -1,6 +1,9 @@
 <template>
   <div class="tableBox flex flex-1 flex-col">
-    <FilterComponent :table="table"></FilterComponent>
+    <FilterComponent
+      :table="table"
+      :column="table.header.column"
+    ></FilterComponent>
 
     <div class="table-container">
       <Table>
@@ -115,6 +118,7 @@ import {
   getPaginationRowModel, // 分頁
   getSortedRowModel, // 排序
   getFilteredRowModel, // 搜尋
+  getFacetedMinMaxValues,
 } from '@tanstack/vue-table';
 import { getAllOrder } from '@/mock/index'; // 引入假資料獲取函數
 import sortBtn from '../ui/table/sortBtn.vue';
@@ -248,6 +252,7 @@ const table = useVueTable({
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
+  getFacetedMinMaxValues: getFacetedMinMaxValues(),
   state: {
     get globalFilter() {
       return filter.value;

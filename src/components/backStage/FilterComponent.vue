@@ -26,7 +26,9 @@
       <label for="minValue">最小值:</label>
       <input
         id="minValue"
-        v-model.number="minValue"
+        v-model.number="columnFilterValue"
+        :min="props.column.getFacetedMinMaxValues ? [0] : ''"
+        :max="props.column.getFacetedMinMaxValues ? [1] : ''"
         type="number"
         placeholder="輸入最小值"
         class="rounded-md px-2 py-1 border border-gray-700"
@@ -56,18 +58,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 // import DebouncedInput from './DebouncedInput.vue';
 const props = defineProps({
   table: {
     type: Object,
     required: true,
   },
+  column: {
+    type: Object,
+    required: true,
+  },
 });
 const filter = ref('');
 const filterStatus = ref('');
-const minValue = ref(null);
-const maxValue = ref(null);
+const minValue = ref(props.column.getFacetedMinMaxValues ? [0] : '');
+const maxValue = ref(props.column.getFacetedMinMaxValues ? [1] : '');
+console.log('column', props.column);
 
 // const emit = defineEmits(['update:filterStatus']);
 // function updateFilterStatus() {
@@ -75,11 +82,17 @@ const maxValue = ref(null);
 //   props.table.setColumnFilters();
 //   emit('update:filterStatus', filterStatus.value);
 // }
+const columnFilterValue = computed(() => props.column.getFilterValue());
+
 function handleSearch() {
   if (filterStatus.value) {
     console.log('ok');
     props.table.setColumnFilters([{ id: 'status', value: filterStatus.value }]);
   }
+  if (minValue.value) {
+    console.log('min', minValue.value);
+  }
+  console.log('columnFilterValue', columnFilterValue);
 }
 </script>
 
