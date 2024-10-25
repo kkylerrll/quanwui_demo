@@ -6,7 +6,7 @@
     ></FilterComponent>
 
     <div class="table-container">
-      <Table>
+      <Table class="w-full">
         <TableHeader>
           <TableRow
             v-for="headerGroup in table.getHeaderGroups()"
@@ -119,6 +119,7 @@ import {
   getSortedRowModel, // 排序
   getFilteredRowModel, // 搜尋
   getFacetedMinMaxValues,
+  getExpandedRowModel, // 展開
   // ColumnFiltersState,
 } from '@tanstack/vue-table';
 import { getAllOrder } from '@/mock/index'; // 引入假資料獲取函數
@@ -158,7 +159,7 @@ const columns = ref([
   {
     accessorKey: 'readCount',
     header: '閱讀次數',
-    enableGlobalFilter: true, // 可搜尋
+    // enableGlobalFilter: true, // 可搜尋
     enableColumnFilter: true, // 啟用列過濾
   },
   {
@@ -173,6 +174,7 @@ const columns = ref([
     header: '創建時間',
     cell: (info) => info.getValue(),
     enableGlobalFilter: true, // 可搜尋
+    enableColumnFilter: true, // 啟用列過濾
   },
   {
     accessorKey: 'onlineView',
@@ -212,8 +214,7 @@ const totalPage = ref(1); // 所有的頁數
 //   return filters;
 // }); // 列過濾
 
-// 獲取資料
-
+// 獲取列過濾資料
 const columnFilters = ref([]);
 
 const tableData = async () => {
@@ -259,6 +260,7 @@ const table = useVueTable({
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
   getFacetedMinMaxValues: getFacetedMinMaxValues(),
+  getExpandedRowModel: getExpandedRowModel(),
   state: {
     get globalFilter() {
       return filter.value;
@@ -288,30 +290,6 @@ const table = useVueTable({
     debouncedTableData();
     console.log(filter.value);
   },
-  // onColumnFiltersChange: (updaterOrValue) => {
-  //   filterStatus.value =
-  //     typeof updaterOrValue === 'function'
-  //       ? updaterOrValue(filterStatus.value)
-  //           .map((status) => status.value)
-  //           .toString()
-  //       : updaterOrValue;
-  //   filterReadCountMin.value =
-  //     typeof updaterOrValue === 'function'
-  //       ? updaterOrValue(filterReadCountMin.value)
-  //           .map((readCount) => readCount.value)
-  //           .toString()
-  //       : updaterOrValue;
-  //   filterReadCountMax.value =
-  //     typeof updaterOrValue === 'function'
-  //       ? updaterOrValue(filterReadCountMax.value)
-  //           .map((readCount) => readCount.value)
-  //           .toString()
-  //       : updaterOrValue;
-  //   tableData();
-  //   console.log('filterReadCountMin', filterReadCountMin.value);
-  //   console.log('filterStatus', filterStatus.value);
-  //   console.log('columnFilters', columnFilters.value);
-  // },
   onColumnFiltersChange: (updaterOrValue) => {
     columnFilters.value =
       typeof updaterOrValue === 'function'
@@ -328,24 +306,29 @@ const table = useVueTable({
     )?.value;
 
     // 獲取所有與 readCount 相關的過濾器
-    const readCountFilters = columnFilters.value.filter(
-      (filter) => filter.id === 'readCount',
-    );
+    // const readCountFilters = columnFilters.value.filter(
+    //   (filter) => filter.id === 'readCount',
+    // );
 
-    // 提取 min 和 max 值並轉換為數字
-    filterReadCountMin.value =
-      readCountFilters.length > 0 ? parseInt(readCountFilters[0].value) : 1; // 第一筆資料作為最小值
+    // // 提取 min 和 max 值並轉換為數字
+    // filterReadCountMin.value =
+    //   readCountFilters.length > 0 && readCountFilters[0].value[0] !== ''
+    //     ? readCountFilters[0].value[0]
+    //     : 1; // 第一筆資料作為最小值
 
-    filterReadCountMax.value =
-      readCountFilters.length > 1
-        ? parseInt(readCountFilters[1].value)
-        : 200000; // 第二筆資料作為最大值
+    // filterReadCountMax.value =
+    //   readCountFilters.length > 0 && readCountFilters[0].value[1] !== ''
+    //     ? readCountFilters[0].value[1]
+    //     : 200000; // 第二筆資料作為最大值
 
     tableData();
     console.log('columnFilterValues', columnFilterValues);
     console.log('filterReadCountMin', filterReadCountMin.value);
     console.log('filterReadCountMax', filterReadCountMax.value);
     console.log('filterStatus', filterStatus.value);
+    // console.log('readCountFilters', readCountFilters.length);
+    // console.log('readCountFilters min', readCountFilters[0].value[0]);
+    // console.log('readCountFilters max', readCountFilters[0].value[1]);
     console.log('columnFilters', columnFilters.value);
   },
 });
