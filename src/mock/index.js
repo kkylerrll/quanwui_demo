@@ -50,11 +50,7 @@ const getAllOrder = (
         ? item.readCount >= minValue && item.readCount <= maxValue
         : true;
 
-    // // 日期篩選邏輯
-    // const itemDate = new Date(item.createTime);
-    // const matchesDateRange =
-    //   (!startDate || itemDate >= new Date(startDate)) &&
-    //   (!endDate || itemDate <= new Date(endDate));
+    // 日期篩選邏輯
 
     const itemDate = new Date(item.createTime).getTime();
     const start = startDate ? new Date(startDate).getTime() : null;

@@ -38,6 +38,15 @@ const router = createRouter({
           },
           component: () => import('@/components/backStage/VuetifyTable.vue'),
         },
+        // {
+        //   path: 'test',
+        //   name: 'test',
+        //   meta: {
+        //     title: 'date range',
+        //     requiredKinds: [2],
+        //   },
+        //   component: () => import('@/components/backStage/test.vue'),
+        // },
       ],
     },
   ],
