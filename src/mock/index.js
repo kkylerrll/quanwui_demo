@@ -10,7 +10,7 @@ const mockTableData = userData.map((user, index) => ({
   readCount: Mock.Random.integer(0, 200000),
   // status: Mock.Random.boolean().toString(),
   status: Mock.Random.pick(['0', '1']),
-  createTime: Mock.Random.date('yyyy-MM-dd HH:mm:ss'),
+  createTime: Mock.Random.date('yyyy-MM-dd'),
   onlineView: Mock.Random.boolean(),
 }));
 
@@ -31,6 +31,8 @@ const getAllOrder = (
   status,
   minValue,
   maxValue,
+  startDate,
+  endDate,
 ) => {
   let filteredData = mockTableData.filter((item) => {
     // 檢查所有欄位是否符合搜尋條件
@@ -47,7 +49,22 @@ const getAllOrder = (
       minValue !== undefined && maxValue !== undefined
         ? item.readCount >= minValue && item.readCount <= maxValue
         : true;
-    return matchesSearch && matchesStatus && matchesValueRange;
+
+    // // 日期篩選邏輯
+    // const itemDate = new Date(item.createTime);
+    // const matchesDateRange =
+    //   (!startDate || itemDate >= new Date(startDate)) &&
+    //   (!endDate || itemDate <= new Date(endDate));
+
+    const itemDate = new Date(item.createTime).getTime();
+    const start = startDate ? new Date(startDate).getTime() : null;
+    const end = endDate ? new Date(endDate).getTime() : null;
+    const matchesDateRange =
+      (!start || itemDate >= start) && (!end || itemDate <= end);
+
+    return (
+      matchesSearch && matchesStatus && matchesValueRange && matchesDateRange
+    );
   });
 
   const sortedData = filteredData.sort((a, b) => {

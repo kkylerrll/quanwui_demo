@@ -40,9 +40,9 @@
         </TableHeader>
         <TableBody>
           <TableRow
-            v-for="(row, index) in tableRows"
+            v-for="row in table.getRowModel().rows"
             :key="row.id"
-            :rowIndex="index"
+            :rowIndex="2"
           >
             <TableCell>
               <input
@@ -118,9 +118,7 @@ import {
   getPaginationRowModel, // 分頁
   getSortedRowModel, // 排序
   getFilteredRowModel, // 搜尋
-  getFacetedMinMaxValues,
   getExpandedRowModel, // 展開
-  // ColumnFiltersState,
 } from '@tanstack/vue-table';
 import { getAllOrder } from '@/mock/index'; // 引入假資料獲取函數
 import sortBtn from '../ui/table/sortBtn.vue';
@@ -132,6 +130,10 @@ import FilterComponent from './FilterComponent.vue';
 const debouncedTableData = debounce(() => {
   tableData();
 }, 400);
+// const formatDate = (dateString) => {
+//   const options = { year: 'numeric', month: 'short', day: 'numeric' };
+//   return new Date(dateString).toLocaleDateString(undefined, options);
+// };
 // 儲存表格資料
 const data = ref([]);
 // 定義表格的欄位
@@ -173,7 +175,9 @@ const columns = ref([
     accessorKey: 'createTime',
     header: '創建時間',
     cell: (info) => info.getValue(),
-    enableGlobalFilter: true, // 可搜尋
+    // cell: (info) => formatDate(info.getValue()),
+    filterFn: 'isWithinRange',
+    // enableGlobalFilter: true, // 可搜尋
     enableColumnFilter: true, // 啟用列過濾
   },
   {
@@ -192,6 +196,8 @@ const filter = ref(''); // 搜尋
 const filterStatus = ref(''); // 狀態列篩選
 const filterReadCountMin = ref(1); // 閱讀次數列篩選
 const filterReadCountMax = ref(200000); // 閱讀次數列篩選
+const filterStartDate = ref(''); // 閱讀次數列篩選
+const filterEndDate = ref(''); // 閱讀次數列篩選
 const sorting = ref([]); // 排序總資料
 const sortOrder = ref(null); // 排序 升序 or 降序
 const sortField = ref(null); // 排序 排序欄位
@@ -202,17 +208,6 @@ const route = useRoute();
 const router = useRouter();
 const allSelected = ref(false); // 追蹤是否全選的狀態
 const totalPage = ref(1); // 所有的頁數
-
-// const columnFilters = ref(() => {
-//   const filters = [];
-//   if (filterStatus.value)
-//     filters.push({ id: 'status', value: filterStatus.value });
-//   if (filterReadCountMin.value)
-//     filters.push({ id: 'readCount', value: filterReadCountMin.value });
-//   if (filterReadCountMax.value)
-//     filters.push({ id: 'readCount', value: filterReadCountMax.value });
-//   return filters;
-// }); // 列過濾
 
 // 獲取列過濾資料
 const columnFilters = ref([]);
@@ -226,6 +221,8 @@ const tableData = async () => {
     filterStatus.value,
     filterReadCountMin.value,
     filterReadCountMax.value,
+    filterStartDate.value,
+    filterEndDate.value,
   );
   data.value = response.data;
   totalRecords.value = response.total;
@@ -235,6 +232,7 @@ const tableData = async () => {
   console.log('獲取的資料:', data.value); // 確認當前頁的資料
   console.log('獲取的所有資料:', totalRecords.value); // 確認所有的資料
   console.log('所有頁碼', totalPage.value);
+  console.log('getRowModel:', table.getRowModel().rows);
 };
 
 // 當前頁碼變化時，更新路由
@@ -259,8 +257,10 @@ const table = useVueTable({
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
-  getFacetedMinMaxValues: getFacetedMinMaxValues(),
   getExpandedRowModel: getExpandedRowModel(),
+  filterFns: {
+    isWithinRange: isWithinRange,
+  },
   state: {
     get globalFilter() {
       return filter.value;
@@ -288,7 +288,7 @@ const table = useVueTable({
         ? updaterOrValue(filter.value)
         : updaterOrValue;
     debouncedTableData();
-    console.log(filter.value);
+    console.log('GlobalFilter', filter.value, 'Type:', typeof filter.value);
   },
   onColumnFiltersChange: (updaterOrValue) => {
     columnFilters.value =
@@ -296,48 +296,47 @@ const table = useVueTable({
         ? updaterOrValue(columnFilters.value)
         : updaterOrValue;
 
-    const columnFilterValues = columnFilters.value.map(
-      (filter) => filter.value,
-    );
-
     // 取出 status 的 value 值
     filterStatus.value = columnFilters.value.find(
       (filter) => filter.id === 'status',
     )?.value;
 
     // 獲取所有與 readCount 相關的過濾器
-    // const readCountFilters = columnFilters.value.filter(
-    //   (filter) => filter.id === 'readCount',
+    const readCountFilters = columnFilters.value.filter(
+      (filter) => filter.id === 'readCount',
+    );
+    // 提取 min 和 max 值並轉換為數字
+    filterReadCountMin.value =
+      readCountFilters.length > 0 && readCountFilters[0].value[0] !== null
+        ? readCountFilters[0].value[0]
+        : 1; // 第一筆資料作為最小值
+
+    filterReadCountMax.value =
+      readCountFilters.length > 0 && readCountFilters[0].value[1] !== null
+        ? readCountFilters[0].value[1]
+        : 200000; // 第二筆資料作為最大值
+
+    // const createTimeFilter = columnFilters.value.filter(
+    //   (filter) => filter.id === 'createTime',
     // );
 
-    // // 提取 min 和 max 值並轉換為數字
-    // filterReadCountMin.value =
-    //   readCountFilters.length > 0 && readCountFilters[0].value[0] !== ''
-    //     ? readCountFilters[0].value[0]
-    //     : 1; // 第一筆資料作為最小值
-
-    // filterReadCountMax.value =
-    //   readCountFilters.length > 0 && readCountFilters[0].value[1] !== ''
-    //     ? readCountFilters[0].value[1]
-    //     : 200000; // 第二筆資料作為最大值
+    // filterStartDate.value =
+    //   createTimeFilter.length > 0 && createTimeFilter[0].value[0] !== ''
+    //     ? createTimeFilter[0].value[0]
+    //     : '';
+    // filterEndDate.value =
+    //   createTimeFilter.length > 0 && createTimeFilter[0].value[1] !== ''
+    //     ? createTimeFilter[0].value[1]
+    //     : '';
 
     tableData();
-    console.log('columnFilterValues', columnFilterValues);
-    console.log('filterReadCountMin', filterReadCountMin.value);
-    console.log('filterReadCountMax', filterReadCountMax.value);
-    console.log('filterStatus', filterStatus.value);
-    // console.log('readCountFilters', readCountFilters.length);
-    // console.log('readCountFilters min', readCountFilters[0].value[0]);
-    // console.log('readCountFilters max', readCountFilters[0].value[1]);
+    console.log('filterStartDate', filterStartDate.value);
+    console.log('filterEndDate', filterEndDate.value);
     console.log('columnFilters', columnFilters.value);
   },
 });
 console.log('columns', columns.value);
 console.log('table columns:', table.getAllColumns()); // 檢查所有的列
-const tableRows = computed(() => {
-  return table.getRowModel().rows;
-});
-
 // 切換全選
 function toggleAll() {
   const newValue = !allSelected.value;
@@ -367,12 +366,30 @@ const handleShare = () => {
   console.log('分享功能尚未實現');
 };
 
-// function handleFilterStatus(status) {
-//   filterStatus.value = status; // 更新狀態
-//   tableData();
-//   console.log('filterStatus', filterStatus.value);
-//   console.log('columnFilters', columnFilters.value);
-// }
+// 篩選函式，用於篩選在日期範圍內的行
+function isWithinRange(row, columnId, value) {
+  const dateValue = row.getValue(columnId);
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+
+  let [start, end] = value;
+  start = typeof start === 'string' ? new Date(start) : start;
+  end = typeof end === 'string' ? new Date(end) : end;
+  filterStartDate.value = start || '';
+  filterEndDate.value = end || '';
+  if ((start || end) && !date) {
+    return false;
+  }
+
+  if (start && !end) {
+    return date.getTime() >= start.getTime();
+  } else if (!start && end) {
+    return date.getTime() <= end.getTime();
+  } else if (start && end) {
+    return date.getTime() >= start.getTime() && date.getTime() <= end.getTime();
+  } else {
+    return true;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
