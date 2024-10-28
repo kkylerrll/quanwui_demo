@@ -13,7 +13,6 @@ const props = defineProps({
   },
   rowIndex: {
     type: Number,
-    required: true,
   },
 });
 

@@ -39,55 +39,43 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow
-            v-for="row in table.getRowModel().rows"
+          <template
+            v-for="row in tableRow"
             :key="row.id"
-            :rowIndex="2"
           >
-            <TableCell>
-              <input
-                :id="'checkbox-' + row.id"
-                name="rowCheckbox"
-                type="checkbox"
-                :checked="row.original.selected"
-                aria-label="Select row"
-                @change="(e) => updateSelection(row.id, e.target.checked)"
-              />
-            </TableCell>
-            <TableCell
-              v-for="cell in row.getVisibleCells()"
-              :key="cell.id"
-            >
-              <template v-if="cell.column.columnDef.accessorKey === 'actions'">
-                <!-- 分享按鈕 -->
-                <button
-                  class="shareBtn p-2"
-                  @click="handleShare"
-                >
-                  <svgIcon
-                    name="share"
-                    class="w-[22px] h-[22px]"
-                  />
-                </button>
-                <!-- 編輯按鈕 -->
-                <button
-                  class="editBtn p-2"
-                  @click="handleEdit(row.id)"
-                >
-                  <svgIcon
-                    name="edit"
-                    class="w-[22px] h-[22px]"
-                  />
-                </button>
-              </template>
-              <template v-else>
+            <TableRow :row-index="row.index">
+              <TableCell>
+                <input
+                  :id="'checkbox-' + row.id"
+                  name="rowCheckbox"
+                  type="checkbox"
+                  :checked="row.original.selected"
+                  aria-label="Select row"
+                  @change="(e) => updateSelection(row.id, e.target.checked)"
+                />
+              </TableCell>
+              <TableCell
+                v-for="cell in row.getVisibleCells()"
+                :key="cell.id"
+              >
                 <FlexRender
                   :render="cell.column.columnDef.cell"
                   :props="cell.getContext()"
                 />
-              </template>
-            </TableCell>
-          </TableRow>
+              </TableCell>
+            </TableRow>
+            <TableRow
+              v-if="row.getIsExpanded()"
+              :key="row.id + '-expanded'"
+              class="expanded-row"
+            >
+              <TableCell :colspan="cellLength(row)">
+                <pre :style="{ fontSize: '10px' }">
+                  <code>{{ JSON.stringify(row.original, null, 2) }}</code>
+                </pre>
+              </TableCell>
+            </TableRow>
+          </template>
         </TableBody>
       </Table>
       <Pagination
@@ -188,8 +176,20 @@ const columns = ref([
   },
   {
     accessorKey: 'actions',
-    header: '操作',
+    header: '展開',
     enableSorting: false,
+    cell: ({ row }) => {
+      return row.getCanExpand()
+        ? h(
+            'button',
+            {
+              onClick: row.getToggleExpandedHandler(),
+              style: { cursor: 'pointer' },
+            },
+            row.getIsExpanded() ? '👇' : '👉',
+          )
+        : '';
+    },
   },
 ]);
 const filter = ref(''); // 搜尋
@@ -208,10 +208,13 @@ const route = useRoute();
 const router = useRouter();
 const allSelected = ref(false); // 追蹤是否全選的狀態
 const totalPage = ref(1); // 所有的頁數
+const expanded = ref({});
 
 // 獲取列過濾資料
 const columnFilters = ref([]);
-
+const cellLength = (row) => {
+  return row.getAllCells().length;
+};
 const tableData = async () => {
   const response = getAllOrder(
     currentPage.value,
@@ -234,7 +237,9 @@ const tableData = async () => {
   console.log('所有頁碼', totalPage.value);
   console.log('getRowModel:', table.getRowModel().rows);
 };
-
+const tableRow = computed(() => {
+  return table.getRowModel().rows;
+});
 // 當前頁碼變化時，更新路由
 watch(currentPage, (newPage) => {
   router.replace({ name: 'memberWorksList', params: { page: newPage } }); // 更新路由
@@ -257,6 +262,7 @@ const table = useVueTable({
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
+  getRowCanExpand: () => true,
   getExpandedRowModel: getExpandedRowModel(),
   filterFns: {
     isWithinRange: isWithinRange,
@@ -270,6 +276,9 @@ const table = useVueTable({
     },
     get columnFilters() {
       return columnFilters.value;
+    },
+    get expanded() {
+      return expanded.value;
     },
   },
   onSortingChange: (updaterOrValue) => {
@@ -316,23 +325,17 @@ const table = useVueTable({
         ? readCountFilters[0].value[1]
         : 200000; // 第二筆資料作為最大值
 
-    // const createTimeFilter = columnFilters.value.filter(
-    //   (filter) => filter.id === 'createTime',
-    // );
-
-    // filterStartDate.value =
-    //   createTimeFilter.length > 0 && createTimeFilter[0].value[0] !== ''
-    //     ? createTimeFilter[0].value[0]
-    //     : '';
-    // filterEndDate.value =
-    //   createTimeFilter.length > 0 && createTimeFilter[0].value[1] !== ''
-    //     ? createTimeFilter[0].value[1]
-    //     : '';
-
     tableData();
     console.log('filterStartDate', filterStartDate.value);
     console.log('filterEndDate', filterEndDate.value);
     console.log('columnFilters', columnFilters.value);
+  },
+  onExpandedChange: (updaterOrValue) => {
+    expanded.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(expanded.value)
+        : updaterOrValue;
+    console.log('expanded', expanded.value);
   },
 });
 console.log('columns', columns.value);
@@ -352,21 +355,21 @@ function onPageChange(newPage) {
   tableData(); // 重新獲取分頁資料
 }
 
-const editModalVisible = ref(false);
-const selectedUserId = ref();
-const handleEdit = (rowId) => {
-  editModalVisible.value = !editModalVisible.value;
-  const selectedUser = data.value.find((user) => user.id === rowId); // 根據行ID獲取用戶資料
-  if (selectedUser) {
-    selectedUserId.value = selectedUser.id;
-  }
-};
+// const editModalVisible = ref(false);
+// const selectedUserId = ref();
+// const handleEdit = (rowId) => {
+//   editModalVisible.value = !editModalVisible.value;
+//   const selectedUser = data.value.find((user) => user.id === rowId); // 根據行ID獲取用戶資料
+//   if (selectedUser) {
+//     selectedUserId.value = selectedUser.id;
+//   }
+// };
 
-const handleShare = () => {
-  console.log('分享功能尚未實現');
-};
+// const handleShare = () => {
+//   console.log('分享功能尚未實現');
+// };
 
-// 篩選函式，用於篩選在日期範圍內的行
+// 篩選日期範圍
 function isWithinRange(row, columnId, value) {
   const dateValue = row.getValue(columnId);
   const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;

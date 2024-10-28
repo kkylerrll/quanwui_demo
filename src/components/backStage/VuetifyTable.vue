@@ -1,5 +1,6 @@
 <template>
   <div class="flex-1">
+    <!-- 過濾欄位 -->
     <div class="flex gap-2">
       <v-text-field
         v-model="search"
@@ -69,6 +70,7 @@
       :sort-desc-icon="SvgIconDesc"
       item-value="workName"
       show-select
+      show-expand
       @update:sort-by="handleSorting"
     >
       <!-- 自定義 customer 欄位顯示 -->
@@ -84,6 +86,11 @@
         <span>
           {{ item.status === '0' ? '公開' : '不公開' }}
         </span>
+      </template>
+      <template #expanded-row="{ columns, item }">
+        <tr>
+          <td :colspan="columns.length">{{ item.workName }}</td>
+        </tr>
       </template>
       <template #bottom>
         <div class="flex justify-center">
