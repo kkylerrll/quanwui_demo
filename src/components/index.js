@@ -1,6 +1,7 @@
 import Headers from './common/header.vue';
 import AsideMenu from './common/AsideMenu.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
+import Button from '@/components/common/Button.vue';
 
 // 初始化
 const component = {
@@ -9,8 +10,8 @@ const component = {
     app.component('Headers', Headers);
     app.component('AsideMenu', AsideMenu);
     app.component('SvgIcon', SvgIcon);
+    app.component('CommonButton', Button);
   },
 };
 
-// 暴露組件
 export default component;

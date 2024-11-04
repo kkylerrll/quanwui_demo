@@ -9,6 +9,7 @@ import vuetify from './plugins/vuetify.js';
 import '@mdi/font/css/materialdesignicons.css';
 import './mock/taiwanData';
 import i18n from '@/locales/index';
+import './assets/index.css';
 
 // createApp(App).mount('#app');
 const app = createApp(App);

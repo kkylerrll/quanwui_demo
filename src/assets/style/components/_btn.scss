@@ -1,0 +1,26 @@
+.btn {
+  padding: 10px 30px;
+  gap: 10px;
+  border-radius: 50px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: $fz2;
+  display: flex;
+  align-items: center;
+  &.outline {
+    background-color: #fff;
+    outline: 1px solid #FF7635 ;
+    .icon {
+      color: inherit;
+      font-size: 18px;
+    }
+  }
+}
+
+.btn-primary {
+  color: $orange-color;
+  &:hover {
+    color: #d95623;
+  }
+}
