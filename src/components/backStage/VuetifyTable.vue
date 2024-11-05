@@ -286,20 +286,20 @@ const handleColumnFilter = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .v-data-table-header__content {
   justify-content: center;
 }
 
 :deep(.searchIcon) {
-  background: $primary-color;
+  background: #015c61;
   padding: 7px;
   width: 30px;
   height: 30px;
   border-radius: 50px;
 }
 :deep(.sortIcon) {
-  fill: $primary-color;
+  fill: #015c61;
 }
 </style>

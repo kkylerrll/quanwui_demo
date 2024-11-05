@@ -6,6 +6,7 @@ export default {
     tableGroup: '表格',
     tanStackTable: 'TanStackTable',
     vuetifyTable: 'vuetifyTable',
+    shadcnVue: 'Shaden-vue',
   },
   dashboard: {
     welcome: '歡迎回來',

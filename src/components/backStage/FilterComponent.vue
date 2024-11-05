@@ -127,7 +127,7 @@ function handleSearch() {
 </script>
 
 <style lang="scss">
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .searchInput {
   border: 1px solid $danger-color;

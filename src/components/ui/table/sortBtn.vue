@@ -44,13 +44,13 @@ watch(
 );
 </script>
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 .svgIcon {
   width: 11px;
   height: 11px;
   fill: $danger-color;
 }
 .active {
-  fill: $primary-color;
+  fill: #015c61;
 }
 </style>

@@ -122,7 +122,7 @@ const goToNextPage = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .pagination {
   padding: 10px;
@@ -134,7 +134,7 @@ const goToNextPage = () => {
   color: #a7a7a7;
 }
 .numBtn.active {
-  background-color: $primary-color;
+  background-color: #015c61;
   border: none;
   color: white;
 }

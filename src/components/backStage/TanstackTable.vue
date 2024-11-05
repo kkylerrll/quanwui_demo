@@ -396,21 +396,21 @@ function isWithinRange(row, columnId, value) {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .tableBox {
   margin: 0 30px 20px;
   border-radius: 10px;
 }
 .table-container {
-  background-color: $text-white-color;
+  background-color: #fff;
 }
 .shareBtn {
   border: 1px solid #eb9717;
   border-radius: 5px;
 }
 .editBtn {
-  border: 1px solid $primary-color;
+  border: 1px solid #015c61;
   border-radius: 5px;
   margin-left: 10px;
 }

@@ -23,10 +23,10 @@ const computedClass = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .evenRow {
-  background-color: $secondary-color; /* 偶數行綠色 */
+  background-color: #eaf6f6; /* 偶數行綠色 */
 }
 .oddRow {
   background-color: white; /* 奇數行白色 */

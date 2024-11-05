@@ -132,21 +132,21 @@ const toggleSubRoute = (groupIndex, subIndex) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .aside-menu {
   max-width: 250px;
   width: 100%;
   border-radius: 0 50px 0 0;
-  background-color: $text-white-color;
+  background-color: #fff;
 }
 
 .logoutBtn {
-  background-color: $secondary-color;
+  background-color: #eaf6f6;
 }
 
 .text {
-  font-size: $fz2;
+  font-size: 16px;
 }
 
 .category {

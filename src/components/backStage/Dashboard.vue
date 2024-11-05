@@ -149,7 +149,7 @@ const usageData = [
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 .dashboard {
   display: flex;
   text-align: start;
@@ -192,7 +192,7 @@ const usageData = [
       width: 30px;
       height: 30px;
       margin-bottom: 20px;
-      fill: $orange-color;
+      fill: #ff7635;
     }
   }
   .action {
@@ -205,7 +205,7 @@ const usageData = [
     }
     .sheet-text {
       font-size: 26px;
-      color: $orange-color;
+      color: #ff7635;
     }
   }
 }
@@ -233,7 +233,7 @@ const usageData = [
   justify-content: center;
   font-size: 30px;
   font-weight: 700;
-  color: $orange-color;
+  color: #ff7635;
   padding: 12px 0;
   .month-text {
     font-size: 20px;

@@ -45,5 +45,5 @@ const handleClick = () => {
 };
 </script>
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 </style>

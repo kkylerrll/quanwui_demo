@@ -54,7 +54,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/style/all.scss';
+// @import '@/assets/style/all.scss';;
 
 .header_box {
   padding: 20px 30px 25px;
