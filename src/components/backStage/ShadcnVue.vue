@@ -1,6 +1,8 @@
 <template>
   <div class="flex-1 bg-white p-5">
-    <Input />
+    <div class="input-box w-[400px]">
+      <Input />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
