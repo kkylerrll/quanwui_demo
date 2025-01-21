@@ -1,5 +1,5 @@
 <template>
-  <div class="tableBox flex flex-1 flex-col">
+  <div class="tableBox flex flex-1 flex-col overflow-auto">
     <FilterComponent
       :table="table"
       :column="table.getAllColumns()"
