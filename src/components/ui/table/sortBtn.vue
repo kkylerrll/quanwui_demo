@@ -48,7 +48,7 @@ watch(
 .svgIcon {
   width: 11px;
   height: 11px;
-  fill: $danger-color;
+  fill: #eeeeee;
 }
 .active {
   fill: #015c61;

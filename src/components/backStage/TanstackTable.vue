@@ -309,6 +309,7 @@ const table = useVueTable({
     filterStatus.value = columnFilters.value.find(
       (filter) => filter.id === 'status',
     )?.value;
+    console.log('filterStatus', filterStatus.value);
 
     // 獲取所有與 readCount 相關的過濾器
     const readCountFilters = columnFilters.value.filter(
@@ -418,7 +419,7 @@ function isWithinRange(row, columnId, value) {
   background-color: #f6f6f6;
 }
 .searchInput {
-  border: 1px solid $danger-color;
+  border: 1px solid #ff7635;
   border-radius: 50px;
   padding: 8px 15px;
 }

@@ -130,7 +130,7 @@ function handleSearch() {
 // @import '@/assets/style/all.scss';;
 
 .searchInput {
-  border: 1px solid $danger-color;
+  border: 1px solid #ff7635;
   border-radius: 50px;
   padding: 8px 15px;
 }
